@@ -19,7 +19,7 @@ export function BrandExpansionOpportunities() {
 
   const getGrowthPotentialBadge = (potential: 'high' | 'medium' | 'low') => {
     const styles = {
-      high: 'bg-green-100 text-green-800 border-green-300',
+      high: 'bg-[#1770C0] text-white border-[#1770C0]',
       medium: 'bg-yellow-100 text-yellow-800 border-yellow-300',
       low: 'bg-gray-100 text-gray-800 border-gray-300',
     };
@@ -35,28 +35,28 @@ export function BrandExpansionOpportunities() {
     <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-black tracking-wide mb-2">
+        <h2 className="text-2xl font-bold text-[#091831] tracking-wide mb-2">
           BRAND PARTNERSHIP OPPORTUNITIES
         </h2>
-        <div className="h-1 w-24 bg-purple-600" />
+        <div className="h-1 w-24 bg-[#1770C0]" />
         <p className="text-gray-600 mt-3">
           Strategic expansion targets for Playfly to pitch
         </p>
       </div>
 
       {/* Current Partners */}
-      <div className="mb-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
-        <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-          <Check className="w-5 h-5 text-green-600" />
+      <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="mb-8 rounded-xl p-6 border-2 border-[#1770C0]">
+        <h3 className="text-lg font-bold text-[#091831] mb-4 flex items-center gap-2">
+          <Check className="w-5 h-5 text-[#1770C0]" />
           Current Active Partners
         </h3>
         <div className="flex flex-wrap gap-3">
           {CURRENT_BRAND_PARTNERS.map((partner, index) => (
             <div
               key={index}
-              className="bg-white border border-green-300 rounded-lg px-4 py-2 flex items-center gap-2"
+              className="bg-white border border-[#1770C0] rounded-lg px-4 py-2 flex items-center gap-2"
             >
-              <Check className="w-4 h-4 text-green-600" />
+              <Check className="w-4 h-4 text-[#1770C0]" />
               <div>
                 <div className="font-bold text-sm text-gray-900">{partner.brandName}</div>
                 <div className="text-xs text-gray-600">{partner.industryCategory}</div>
@@ -75,24 +75,24 @@ export function BrandExpansionOpportunities() {
           return (
             <div
               key={index}
-              className="border-2 border-gray-200 rounded-xl overflow-hidden hover:border-purple-300 transition-all duration-300"
+              className="border-t-4 border-[#1770C0] border-2 border-gray-200 rounded-xl overflow-hidden hover:border-[#1770C0] transition-all duration-300"
             >
               {/* Category Header */}
               <button
                 onClick={() => setExpandedCategory(isExpanded ? null : category.category)}
-                className="w-full p-6 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-purple-50 hover:to-indigo-50 transition-all duration-300"
+                className="w-full p-6 bg-gradient-to-r from-gray-50 to-gray-100 transition-all duration-300"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-lg bg-[#1770C0] flex items-center justify-center">
                       <Icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-xl font-bold text-black">{category.category}</h3>
+                      <h3 className="text-xl font-bold text-[#091831]">{category.category}</h3>
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-sm text-gray-600">{category.brands.length} brands identified</span>
                         <span className="text-gray-400">•</span>
-                        <span className="text-sm font-semibold text-purple-900">
+                        <span className="text-sm font-semibold text-[#1770C0]">
                           {formatNumber(category.estimatedPartnershipValue)} opportunity
                         </span>
                       </div>
@@ -114,7 +114,7 @@ export function BrandExpansionOpportunities() {
               {isExpanded && (
                 <div className="p-6 bg-white border-t border-gray-200">
                   {/* Category Description */}
-                  <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="mb-6 p-4 rounded-lg border border-[#1770C0]">
                     <div className="text-sm text-gray-700">{category.description}</div>
                   </div>
 
@@ -123,7 +123,7 @@ export function BrandExpansionOpportunities() {
                     {category.brands.map((brand, brandIdx) => (
                       <div
                         key={brandIdx}
-                        className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:shadow-md transition-all duration-300"
+                        className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg p-4 hover:border-[#1770C0] hover:shadow-md transition-all duration-300"
                       >
                         <div className="font-bold text-gray-900 mb-1">{brand}</div>
                         <div className="text-xs text-gray-600">Target for outreach</div>
@@ -133,19 +133,19 @@ export function BrandExpansionOpportunities() {
 
                   {/* Key Metrics */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
                       <div className="text-xs text-gray-600 mb-1">Athlete Reach</div>
-                      <div className="text-2xl font-bold text-blue-900">{category.athleteReach.toLocaleString()}</div>
+                      <div className="text-2xl font-bold text-[#1770C0]">{category.athleteReach.toLocaleString()}</div>
                     </div>
 
-                    <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
                       <div className="text-xs text-gray-600 mb-1">Partnership Value</div>
-                      <div className="text-2xl font-bold text-purple-900">{formatNumber(category.estimatedPartnershipValue)}</div>
+                      <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(category.estimatedPartnershipValue)}</div>
                     </div>
 
-                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                    <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
                       <div className="text-xs text-gray-600 mb-1">Growth Potential</div>
-                      <div className="text-2xl font-bold text-green-900">{category.growthPotential.toUpperCase()}</div>
+                      <div className="text-2xl font-bold text-[#1770C0]">{category.growthPotential.toUpperCase()}</div>
                     </div>
                   </div>
 
@@ -170,57 +170,57 @@ export function BrandExpansionOpportunities() {
 
       {/* Summary Stats */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 border-2 border-[#1770C0]">
           <div className="text-sm text-gray-600 mb-2">Total Brands Identified</div>
-          <div className="text-4xl font-bold text-purple-900">
+          <div className="text-4xl font-bold text-[#1770C0]">
             {EXPANSION_OPPORTUNITIES.reduce((sum, cat) => sum + cat.brands.length, 0)}
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 border-2 border-[#1770C0]">
           <div className="text-sm text-gray-600 mb-2">Total Opportunity Value</div>
-          <div className="text-4xl font-bold text-green-900">
+          <div className="text-4xl font-bold text-[#1770C0]">
             {formatNumber(EXPANSION_OPPORTUNITIES.reduce((sum, cat) => sum + cat.estimatedPartnershipValue, 0))}
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-6 border border-amber-200">
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 border-2 border-[#1770C0]">
           <div className="text-sm text-gray-600 mb-2">High Growth Categories</div>
-          <div className="text-4xl font-bold text-amber-900">
+          <div className="text-4xl font-bold text-[#1770C0]">
             {EXPANSION_OPPORTUNITIES.filter(cat => cat.growthPotential === 'high').length}
           </div>
         </div>
       </div>
 
       {/* Bottom Callout */}
-      <div className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
+      <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="mt-8 rounded-xl p-6 border-2 border-[#1770C0]">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-[#1770C0] flex items-center justify-center flex-shrink-0">
             <DollarSign className="w-6 h-6 text-white" />
           </div>
           <div>
-            <div className="text-lg font-bold text-blue-900 mb-3">Partnership Model Benefits</div>
+            <div className="text-lg font-bold text-[#091831] mb-3">Partnership Model Benefits</div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#1770C0] rounded-full" />
                 <span className="text-sm text-gray-700">
                   <strong>Multi-school packages:</strong> Brands can sponsor athletes across 3-5 schools for maximum reach
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#1770C0] rounded-full" />
                 <span className="text-sm text-gray-700">
                   <strong>Data-backed guarantees:</strong> Proven +45% engagement lift on branded content
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#1770C0] rounded-full" />
                 <span className="text-sm text-gray-700">
                   <strong>Seasonal customization:</strong> Campaigns tailored to football, basketball, or year-round schedules
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#1770C0] rounded-full" />
                 <span className="text-sm text-gray-700">
                   <strong>Exclusive school partnerships:</strong> Category exclusivity within each school
                 </span>

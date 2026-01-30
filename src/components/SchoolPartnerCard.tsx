@@ -53,7 +53,7 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
   const getTierBadge = () => {
     if (partner.tier === PlayflyPartnerTier.MAX) {
       return (
-        <div className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
+        <div className="flex items-center gap-1 bg-[#1770C0] text-white px-3 py-1 rounded-full text-xs font-bold">
           <Award className="w-3 h-3" />
           <span>PLAYFLY MAX</span>
         </div>
@@ -83,20 +83,20 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
   const maxSportAthletes = Math.max(...sportBreakdown.map(s => s.athletes));
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+    <div className="bg-white border-t-4 border-[#1770C0] border-2 border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
       {/* Header Section */}
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 border-b border-gray-200">
         {/* School Name & Badges */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-2xl font-bold text-black tracking-wide mb-1">
+            <h3 className="text-2xl font-bold text-[#091831] tracking-wide mb-1">
               {partner.schoolName.toUpperCase()}
             </h3>
             <p className="text-gray-600 text-sm">{partner.mascot}</p>
           </div>
           <div className="text-right">
-            <div className="w-16 h-16 rounded-xl bg-white border-2 border-gray-300 flex items-center justify-center mb-2">
-              <span className="text-xs font-bold text-gray-500">
+            <div className="w-16 h-16 rounded-xl bg-white border-2 border-[#1770C0] flex items-center justify-center mb-2">
+              <span className="text-xs font-bold text-[#1770C0]">
                 {partner.schoolName.substring(0, 3).toUpperCase()}
               </span>
             </div>
@@ -121,36 +121,36 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
         {/* Section A: Social Media Performance */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-            <h4 className="text-sm font-bold text-black uppercase tracking-wide">
+            <TrendingUp className="w-5 h-5 text-[#1770C0]" />
+            <h4 className="text-sm font-bold text-[#091831] uppercase tracking-wide">
               Social Media Performance
             </h4>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-blue-50 rounded-lg p-3">
-              <div className="text-2xl font-bold text-blue-900">{formatNumber(partner.athletesTracked)}</div>
+            <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(partner.athletesTracked)}</div>
               <div className="text-xs text-gray-600">Athletes Tracked</div>
             </div>
-            <div className="bg-purple-50 rounded-lg p-3">
-              <div className="text-2xl font-bold text-purple-900">{formatNumber(partner.totalPosts)}</div>
+            <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(partner.totalPosts)}</div>
               <div className="text-xs text-gray-600">Total Posts</div>
             </div>
-            <div className="bg-emerald-50 rounded-lg p-3">
-              <div className="text-2xl font-bold text-emerald-900">{formatLargeNumber(partner.totalLikes)}</div>
+            <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-2xl font-bold text-[#1770C0]">{formatLargeNumber(partner.totalLikes)}</div>
               <div className="text-xs text-gray-600">Total Likes</div>
             </div>
-            <div className="bg-orange-50 rounded-lg p-3">
-              <div className="text-2xl font-bold text-orange-900">{formatLargeNumber(partner.totalComments)}</div>
+            <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-2xl font-bold text-[#1770C0]">{formatLargeNumber(partner.totalComments)}</div>
               <div className="text-xs text-gray-600">Total Comments</div>
             </div>
-            <div className="bg-rose-50 rounded-lg p-3">
-              <div className="text-2xl font-bold text-rose-900">
+            <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-2xl font-bold text-[#1770C0]">
                 {(partner.averageEngagementRate * 100).toFixed(1)}%
               </div>
               <div className="text-xs text-gray-600">Avg Engagement</div>
             </div>
-            <div className="bg-indigo-50 rounded-lg p-3">
-              <div className="text-2xl font-bold text-indigo-900">
+            <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-2xl font-bold text-[#1770C0]">
                 {formatLargeNumber(partner.instagramFollowers + partner.tiktokFollowers)}
               </div>
               <div className="text-xs text-gray-600">Follower Base</div>
@@ -261,7 +261,7 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
         </button>
 
         {/* View Details Button */}
-        <button className="w-full mt-3 flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-bold">
+        <button className="w-full mt-3 flex items-center justify-center gap-2 py-3 px-4 bg-[#1770C0] hover:opacity-90 text-white rounded-lg transition-all text-sm font-bold">
           <ExternalLink className="w-4 h-4" />
           <span>View Full Report</span>
         </button>

@@ -105,14 +105,14 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-black tracking-wide mb-2">
+          <h2 className="text-2xl font-bold text-[#091831] tracking-wide mb-2">
             PLAYFLY PARTNER SCHOOLS
           </h2>
-          <div className="h-1 w-24 bg-blue-600" />
+          <div className="h-1 w-24 bg-[#1770C0]" />
         </div>
         <button
           onClick={() => setShowComparison(true)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm flex items-center gap-2 transition-colors"
+          className="px-4 py-2 bg-[#1770C0] hover:opacity-90 text-white rounded-lg font-semibold text-sm flex items-center gap-2 transition-all"
         >
           <GitCompare className="w-4 h-4" />
           Compare Schools
@@ -121,28 +121,28 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <div className="bg-blue-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-blue-900">{aggregates.totalSchools}</div>
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
+          <div className="text-2xl font-bold text-[#1770C0]">{aggregates.totalSchools}</div>
           <div className="text-xs text-gray-600">Schools</div>
         </div>
-        <div className="bg-purple-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-purple-900">{formatNumber(aggregates.totalAthletes)}</div>
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
+          <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(aggregates.totalAthletes)}</div>
           <div className="text-xs text-gray-600">Athletes</div>
         </div>
-        <div className="bg-emerald-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-emerald-900">{formatNumber(aggregates.totalPosts)}</div>
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
+          <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(aggregates.totalPosts)}</div>
           <div className="text-xs text-gray-600">Posts</div>
         </div>
-        <div className="bg-orange-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-orange-900">{formatNumber(aggregates.totalLikes)}</div>
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
+          <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(aggregates.totalLikes)}</div>
           <div className="text-xs text-gray-600">Likes</div>
         </div>
-        <div className="bg-rose-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-rose-900">{formatNumber(aggregates.totalComments)}</div>
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
+          <div className="text-2xl font-bold text-[#1770C0]">{formatNumber(aggregates.totalComments)}</div>
           <div className="text-xs text-gray-600">Comments</div>
         </div>
-        <div className="bg-indigo-50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-indigo-900">{(aggregates.avgEngagement * 100).toFixed(1)}%</div>
+        <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0]">
+          <div className="text-2xl font-bold text-[#1770C0]">{(aggregates.avgEngagement * 100).toFixed(1)}%</div>
           <div className="text-xs text-gray-600">Avg Engagement</div>
         </div>
       </div>
@@ -157,7 +157,7 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
             placeholder="Search by school name or mascot..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1770C0] focus:border-transparent"
           />
         </div>
 
@@ -169,7 +169,7 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
             <select
               value={tierFilter}
               onChange={e => setTierFilter(e.target.value as TierFilter)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1770C0]"
             >
               <option value="all">All Tiers</option>
               <option value={PlayflyPartnerTier.MAX}>Playfly MAX</option>
@@ -181,7 +181,7 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
           <select
             value={conferenceFilter}
             onChange={e => setConferenceFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1770C0]"
           >
             <option value="all">All Conferences</option>
             {conferences.map(conf => (
@@ -195,7 +195,7 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
           <select
             value={engagementFilter}
             onChange={e => setEngagementFilter(e.target.value as EngagementFilter)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1770C0]"
           >
             <option value="all">All Engagement Rates</option>
             <option value="high">High (&gt;40%)</option>
@@ -209,7 +209,7 @@ export function SchoolPartnersGrid({ partners }: SchoolPartnersGridProps) {
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1770C0]"
             >
               <option value="posts">Sort by Posts</option>
               <option value="engagement">Sort by Engagement</option>
