@@ -74,10 +74,11 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
   };
 
   // Sample top athletes (mocked - in production would come from props)
+  // Using generic names since real athlete data varies by school
   const topAthletes = [
-    { name: 'Drew Allar', sport: 'Football', likes: 3200000, comments: 89000 },
-    { name: 'Nicholas Singleton', sport: 'Football', likes: 2850000, comments: 78000 },
-    { name: 'Emily Rodriguez', sport: 'Volleyball', likes: 1450000, comments: 42000 },
+    { name: `${partner.schoolName} QB`, sport: 'Football', likes: 3200000, comments: 89000 },
+    { name: `${partner.schoolName} RB`, sport: 'Football', likes: 2850000, comments: 78000 },
+    { name: `${partner.schoolName} Guard`, sport: 'Basketball', likes: 1450000, comments: 42000 },
   ];
 
   // Sport breakdown (mocked - in production would calculate from real data)
