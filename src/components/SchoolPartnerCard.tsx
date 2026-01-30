@@ -76,8 +76,21 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
 
   // Get actual top athletes for this school from leaderboard data
   const allTopPerformers = getTopPerformers(50); // Get more to ensure we have enough per school
+
+  // Normalize school name for matching (remove "University" and other suffixes)
+  const normalizeSchoolName = (name: string) => {
+    return name.replace(/ University| State University/gi, '').trim();
+  };
+
+  const normalizedPartnerSchool = normalizeSchoolName(partner.schoolName);
+
   const schoolTopAthletes = allTopPerformers
-    .filter(athlete => athlete.school === partner.schoolName)
+    .filter(athlete => {
+      const normalizedAthleteSchool = normalizeSchoolName(athlete.school);
+      return normalizedAthleteSchool === normalizedPartnerSchool ||
+             athlete.school.includes(normalizedPartnerSchool) ||
+             normalizedPartnerSchool.includes(normalizedAthleteSchool);
+    })
     .slice(0, 3)
     .map(athlete => ({
       name: athlete.athleteName,
