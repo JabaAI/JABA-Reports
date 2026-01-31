@@ -388,7 +388,7 @@ export function getTopPerformers(limit: number = 10): TopAthleteData[] {
       topPostEngagement: 122000,
     },
     {
-      athleteName: 'John Mateer',
+      athleteName: 'Zevi Eckhaus',
       sport: 'Football',
       school: 'Washington State',
       totalLikes: 1650000,
@@ -398,7 +398,7 @@ export function getTopPerformers(limit: number = 10): TopAthleteData[] {
       topPostEngagement: 118000,
     },
     {
-      athleteName: 'Kyle Williams',
+      athleteName: 'Wayshawn Parker',
       sport: 'Football',
       school: 'Washington State',
       totalLikes: 1420000,
@@ -408,7 +408,7 @@ export function getTopPerformers(limit: number = 10): TopAthleteData[] {
       topPostEngagement: 102000,
     },
     {
-      athleteName: 'Charlisse Leger-Walker',
+      athleteName: 'Eleonora Villa',
       sport: 'Women\'s Basketball',
       school: 'Washington State',
       totalLikes: 980000,
