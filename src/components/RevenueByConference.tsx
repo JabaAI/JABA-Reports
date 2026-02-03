@@ -11,7 +11,7 @@ export function RevenueByConference() {
       totalAthletes: 3610,
       avgEngagement: 0.042,
       insight: 'Highest revenue per athlete because of engagement levels. These athletes should command premium pricing.',
-      color: 'from-purple-500 to-indigo-600',
+      color: 'from-[#1770C0] to-indigo-600',
       pricing: 'premium',
     },
     {
@@ -23,7 +23,7 @@ export function RevenueByConference() {
       totalAthletes: 1245,
       avgEngagement: 0.041,
       insight: 'Top revenue per school but only one school in network. Significant expansion opportunity.',
-      color: 'from-blue-500 to-cyan-600',
+      color: 'from-blue-500 to-[#0D5A9F]',
       pricing: 'premium',
     },
     {
@@ -89,7 +89,7 @@ export function RevenueByConference() {
         <h2 className="text-3xl font-bold text-black tracking-wide mb-2">
           REVENUE BY CONFERENCE - WHO'S MONETIZING BETTER?
         </h2>
-        <div className="h-1.5 w-32 bg-gradient-to-r from-purple-600 to-indigo-600" />
+        <div className="h-1.5 w-32 bg-gradient-to-r from-[#1770C0] to-indigo-600" />
         <p className="text-gray-700 mt-3 text-lg">
           Conference tier matters. Which conferences generate more revenue per athlete, and why?
         </p>

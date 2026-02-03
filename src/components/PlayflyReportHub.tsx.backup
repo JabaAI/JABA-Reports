@@ -1,0 +1,654 @@
+import { useState, useEffect, useRef } from 'react';
+import { Briefcase, Network, ArrowLeft, TrendingUp, Sparkles } from 'lucide-react';
+import { motion, useAnimation, useInView, useMotionValue, useTransform } from 'framer-motion';
+import { NetworkDashboard } from './NetworkDashboard';
+import { PlayflyNetworkReport } from './PlayflyNetworkReport';
+import BrandPartnershipDashboard from './BrandPartnershipDashboard';
+
+type View = 'hub' | 'playfly-dashboard' | 'network-report' | 'brand-partnerships';
+
+interface PlayflyReportHubProps {
+  onBack: () => void;
+}
+
+// Counter animation hook
+function useCountUp(end: number, duration: number = 2000, shouldStart: boolean = true) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!shouldStart) return;
+
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+
+      setCount(Math.floor(progress * end));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration, shouldStart]);
+
+  return count;
+}
+
+// Animated Counter Component
+function AnimatedCounter({ value, suffix = '', prefix = '' }: { value: number; suffix?: string; prefix?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const count = useCountUp(value, 2000, isInView);
+
+  return (
+    <span ref={ref}>
+      {prefix}{count.toLocaleString()}{suffix}
+    </span>
+  );
+}
+
+export function PlayflyReportHub({ onBack }: PlayflyReportHubProps) {
+  const [activeView, setActiveView] = useState<View>('hub');
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20,
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Network Report view (middle card)
+  if (activeView === 'network-report') {
+    return <PlayflyNetworkReport onBack={() => setActiveView('hub')} />;
+  }
+
+  // Brand Partnerships view (right card)
+  if (activeView === 'brand-partnerships') {
+    return (
+      <div>
+        <button
+          onClick={() => setActiveView('hub')}
+          className="fixed top-6 left-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all border border-white/20 flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Playfly Reports
+        </button>
+        <BrandPartnershipDashboard />
+      </div>
+    );
+  }
+
+  // Hub view - Landing page with animated sections
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Gradient */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10"
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+
+      {/* Parallax Background Elements */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          x: mousePosition.x,
+          y: mousePosition.y,
+        }}
+        transition={{ type: "spring", stiffness: 50, damping: 30 }}
+      >
+        <div className="absolute top-20 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+      </motion.div>
+
+      {/* Back button */}
+      <motion.button
+        onClick={onBack}
+        className="fixed top-6 left-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all border border-white/20 flex items-center gap-2"
+        whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(34, 211, 238, 0.3)" }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </motion.button>
+
+      {/* Header - Compact Hero Section */}
+      <div className="pt-8 pb-4 px-6 relative z-10">
+        <div className="max-w-6xl mx-auto text-center">
+          <motion.div
+            className="mb-2"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden">
+              <img
+                src="/playfly-logo.jpg"
+                alt="Playfly Sports"
+                className="h-10 w-10 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+          </motion.div>
+
+          <motion.h1
+            className="text-3xl font-bold text-white mb-2 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Playfly Sports Intelligence
+          </motion.h1>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <p className="text-base text-gray-300 max-w-2xl mx-auto">
+              Unlocking{' '}
+              <motion.span
+                className="text-cyan-400 font-bold text-xl"
+                animate={{
+                  textShadow: [
+                    "0 0 10px rgba(34, 211, 238, 0.5)",
+                    "0 0 20px rgba(34, 211, 238, 0.8)",
+                    "0 0 10px rgba(34, 211, 238, 0.5)",
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                $<AnimatedCounter value={45} />M+
+              </motion.span>
+              {' '}in untapped revenue across{' '}
+              <span className="text-white font-semibold"><AnimatedCounter value={36} /> partner schools</span>
+            </p>
+          </motion.div>
+
+          {/* Real school examples */}
+          <motion.div
+            className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <span className="bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">Alabama</span>
+            <span className="bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">Penn State</span>
+            <span className="bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">LSU</span>
+            <span className="bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">Auburn</span>
+            <span className="bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">Texas A&M</span>
+            <span className="bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">+ 31 more</span>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Main Report Options with scroll animations */}
+      <div className="max-w-7xl mx-auto px-6 pb-8 relative z-10">
+        {/* Connecting Line Animation */}
+        <motion.svg
+          className="absolute top-0 left-0 w-full h-full pointer-events-none z-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.2 }}
+          transition={{ delay: 1.2, duration: 1 }}
+        >
+          <motion.path
+            d="M 300 100 Q 500 200 700 100 T 1100 100"
+            stroke="rgba(34, 211, 238, 0.3)"
+            strokeWidth="2"
+            fill="none"
+            strokeDasharray="10 5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ delay: 1.2, duration: 2, ease: "easeInOut" }}
+          />
+        </motion.svg>
+
+        {/* Top Row - Two cards side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 relative z-10">
+          {/* Playfly Dashboard Card - Slide from LEFT */}
+          <AnimatedCard delay={0.6} direction="left">
+            <motion.button
+              onClick={() => window.open('https://jaba-app-1007845235832.us-central1.run.app/playfly', '_blank')}
+              className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 hover:bg-white/15 hover:border-cyan-400/50 transition-all duration-300 text-left overflow-hidden w-full h-full"
+              whileHover={{
+                scale: 1.02,
+                y: -5,
+                boxShadow: "0 20px 40px rgba(34, 211, 238, 0.2)"
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Header Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-10"
+                style={{ backgroundImage: "url('/header BG- V4-WithoutBalls_less.jpg')" }}
+              />
+
+              {/* Gradient background effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20"
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+
+              <div className="relative z-10">
+                {/* Step Badge with pulse */}
+                <motion.div
+                  className="absolute top-0 right-0 w-10 h-10 bg-cyan-500/30 backdrop-blur-sm border border-cyan-400/50 rounded-lg flex items-center justify-center"
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    boxShadow: [
+                      "0 0 0 0 rgba(34, 211, 238, 0.4)",
+                      "0 0 0 10px rgba(34, 211, 238, 0)",
+                      "0 0 0 0 rgba(34, 211, 238, 0)",
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <span className="text-lg font-bold text-cyan-300">1</span>
+                </motion.div>
+
+                {/* Icon */}
+                <motion.div
+                  className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center mb-3"
+                  whileHover={{ scale: 1.15, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </motion.div>
+
+                {/* Title */}
+                <h2 className="text-xl font-bold text-white mb-1">
+                  Playfly Dashboard
+                </h2>
+
+                {/* Step Label */}
+                <div className="text-xs font-semibold text-cyan-400 mb-2 uppercase tracking-wide flex items-center gap-2">
+                  <span>Step 1: Manage</span>
+                  <Sparkles className="w-3 h-3" />
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-300 text-xs mb-3 leading-relaxed">
+                  Real-time campaign management and athlete oversight across your entire network
+                </p>
+
+                {/* Real Example Data */}
+                <div className="bg-white/5 rounded-lg p-2 mb-3 border border-cyan-500/20">
+                  <div className="text-xs text-cyan-400 font-semibold mb-1">LIVE EXAMPLE:</div>
+                  <div className="text-sm text-white">Alabama Crimson Tide</div>
+                  <div className="text-xs text-gray-400">45K followers • 32% avg engagement</div>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="space-y-1.5 mb-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Aggregate Likes</span>
+                    <span className="text-white font-bold"><AnimatedCounter value={2} />.<AnimatedCounter value={1} />M+</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Total Followers</span>
+                    <span className="text-white font-bold"><AnimatedCounter value={5} />M+</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Engagement Rate</span>
+                    <span className="text-white font-bold">18-45%</span>
+                  </div>
+                </div>
+
+                {/* Call to action */}
+                <motion.div
+                  className="flex items-center gap-2 text-cyan-400 text-sm font-semibold"
+                  whileHover={{ gap: "12px" }}
+                >
+                  <span>View Dashboard</span>
+                  <motion.svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </motion.svg>
+                </motion.div>
+              </div>
+            </motion.button>
+          </AnimatedCard>
+
+          {/* Network Report Card - Slide from RIGHT */}
+          <AnimatedCard delay={0.8} direction="right">
+            <motion.button
+              onClick={() => setActiveView('network-report')}
+              className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 hover:bg-white/15 hover:border-blue-400/50 transition-all duration-300 text-left overflow-hidden w-full h-full"
+              whileHover={{
+                scale: 1.02,
+                y: -5,
+                boxShadow: "0 20px 40px rgba(59, 130, 246, 0.2)"
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Gradient background effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-600/20"
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+
+              <div className="relative z-10">
+                {/* Step Badge */}
+                <motion.div
+                  className="absolute top-0 right-0 w-10 h-10 bg-blue-500/30 backdrop-blur-sm border border-blue-400/50 rounded-lg flex items-center justify-center"
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    boxShadow: [
+                      "0 0 0 0 rgba(59, 130, 246, 0.4)",
+                      "0 0 0 10px rgba(59, 130, 246, 0)",
+                      "0 0 0 0 rgba(59, 130, 246, 0)",
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                >
+                  <span className="text-lg font-bold text-blue-300">2</span>
+                </motion.div>
+
+                {/* Icon */}
+                <motion.div
+                  className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-3"
+                  whileHover={{ scale: 1.15, rotate: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Network className="w-6 h-6 text-white" />
+                </motion.div>
+
+                {/* Title */}
+                <h2 className="text-xl font-bold text-white mb-1">
+                  Strategic Opportunities Report
+                </h2>
+
+                {/* Step Label */}
+                <div className="text-xs font-semibold text-blue-400 mb-2 uppercase tracking-wide flex items-center gap-2">
+                  <span>Step 2: Analyze</span>
+                  <Sparkles className="w-3 h-3" />
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-300 text-xs mb-3 leading-relaxed">
+                  AI-powered revenue opportunities and strategic recommendations
+                </p>
+
+                {/* Real Example Data */}
+                <div className="bg-white/5 rounded-lg p-2 mb-3 border border-blue-500/20">
+                  <div className="text-xs text-blue-400 font-semibold mb-1">HIDDEN OPPORTUNITY:</div>
+                  <div className="text-sm text-white">Nike partnerships: $2.4M untapped</div>
+                  <div className="text-xs text-gray-400">15 schools • 127 athletes ready to activate</div>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="space-y-1.5 mb-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Partner Schools</span>
+                    <span className="text-white font-bold"><AnimatedCounter value={36} /></span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Team Pages</span>
+                    <span className="text-white font-bold"><AnimatedCounter value={481} /></span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Report Sections</span>
+                    <span className="text-white font-bold">15+</span>
+                  </div>
+                </div>
+
+                {/* Call to action */}
+                <motion.div
+                  className="flex items-center gap-2 text-blue-400 text-sm font-semibold"
+                  whileHover={{ gap: "12px" }}
+                >
+                  <span>View Report</span>
+                  <motion.svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </motion.svg>
+                </motion.div>
+              </div>
+            </motion.button>
+          </AnimatedCard>
+        </div>
+
+        {/* Bottom Row - Full width Brand Partnerships Card - Slide from BOTTOM */}
+        <AnimatedCard delay={1.0} direction="up">
+          <motion.button
+            onClick={() => setActiveView('brand-partnerships')}
+            className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 hover:bg-white/15 hover:border-purple-400/50 transition-all duration-300 text-left overflow-hidden w-full"
+            whileHover={{
+              scale: 1.01,
+              y: -5,
+              boxShadow: "0 20px 40px rgba(147, 51, 234, 0.2)"
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {/* Gradient background effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-cyan-600/20 to-blue-700/20"
+              initial={{ opacity: 0 }}
+              whileHover={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+
+            <div className="relative z-10">
+              {/* Step Badge */}
+              <motion.div
+                className="absolute top-0 right-0 w-10 h-10 bg-purple-500/30 backdrop-blur-sm border border-purple-400/50 rounded-lg flex items-center justify-center"
+                animate={{
+                  scale: [1, 1.1, 1],
+                  boxShadow: [
+                    "0 0 0 0 rgba(147, 51, 234, 0.4)",
+                    "0 0 0 10px rgba(147, 51, 234, 0)",
+                    "0 0 0 0 rgba(147, 51, 234, 0)",
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+              >
+                <span className="text-lg font-bold text-purple-300">3</span>
+              </motion.div>
+
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                {/* Icon */}
+                <motion.div
+                  className="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.15, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Briefcase className="w-6 h-6 text-white" />
+                </motion.div>
+
+                {/* Content */}
+                <div className="flex-1 w-full">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div className="flex-1">
+                      {/* Title */}
+                      <h2 className="text-xl font-bold text-white mb-1">
+                        Brand Partnerships
+                      </h2>
+
+                      {/* Step Label */}
+                      <div className="text-xs font-semibold text-purple-400 mb-1 uppercase tracking-wide flex items-center gap-2">
+                        <span>Step 3: Optimize</span>
+                        <Sparkles className="w-3 h-3" />
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-gray-300 text-xs leading-relaxed mb-2">
+                        Network-wide brand analysis and sponsorship optimization
+                      </p>
+
+                      {/* Real Brand Examples */}
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        <span className="text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10 text-gray-300">Nike</span>
+                        <span className="text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10 text-gray-300">Wegmans</span>
+                        <span className="text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10 text-gray-300">Raising Cane's</span>
+                        <span className="text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10 text-gray-300">H-E-B</span>
+                        <span className="text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10 text-gray-300">+ 146 more</span>
+                      </div>
+                    </div>
+
+                    {/* Key Metrics Row */}
+                    <div className="flex items-center gap-4 md:gap-6">
+                      <div>
+                        <div className="text-2xl font-bold text-white"><AnimatedCounter value={5277} /></div>
+                        <div className="text-xs text-gray-400">Posts</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-white"><AnimatedCounter value={150} />+</div>
+                        <div className="text-xs text-gray-400">Brands</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-white">26/36</div>
+                        <div className="text-xs text-gray-400">Schools</div>
+                      </div>
+                      <motion.div
+                        className="flex items-center gap-2 text-purple-400 text-sm font-semibold"
+                        whileHover={{ gap: "12px" }}
+                      >
+                        <span>View</span>
+                        <motion.svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity, delay: 0.6 }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </motion.svg>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.button>
+        </AnimatedCard>
+
+        {/* Footer Stats - Animated Count Up */}
+        <motion.div
+          className="mt-6 pt-6 border-t border-white/10"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <StatCard value={36} label="Partner Schools" delay={0} />
+            <StatCard value={2487} label="NIL Opportunities" suffix="+" delay={0.1} />
+            <StatCard value={5277} label="Revenue-Generating Posts" delay={0.2} />
+            <StatCard value={150} label="Active Brands" suffix="+" delay={0.3} />
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+// Animated Card Wrapper Component
+function AnimatedCard({
+  children,
+  delay = 0,
+  direction = 'left'
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  direction?: 'left' | 'right' | 'up' | 'down'
+}) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const variants = {
+    left: { x: -100, opacity: 0 },
+    right: { x: 100, opacity: 0 },
+    up: { y: 100, opacity: 0 },
+    down: { y: -100, opacity: 0 },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={variants[direction]}
+      animate={isInView ? { x: 0, y: 0, opacity: 1 } : variants[direction]}
+      transition={{ duration: 0.8, delay, type: "spring", bounce: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Stat Card Component with Animation
+function StatCard({
+  value,
+  label,
+  suffix = '',
+  delay = 0
+}: {
+  value: number;
+  label: string;
+  suffix?: string;
+  delay?: number;
+}) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+
+  return (
+    <motion.div
+      ref={ref}
+      className="text-center"
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
+      transition={{ delay: 1.4 + delay, duration: 0.5, type: "spring" }}
+    >
+      <motion.div
+        className="text-2xl font-bold text-cyan-400 mb-0.5"
+        animate={isInView ? {
+          textShadow: [
+            "0 0 10px rgba(34, 211, 238, 0.3)",
+            "0 0 20px rgba(34, 211, 238, 0.6)",
+            "0 0 10px rgba(34, 211, 238, 0.3)",
+          ]
+        } : {}}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <AnimatedCounter value={value} suffix={suffix} />
+      </motion.div>
+      <div className="text-xs text-gray-400">{label}</div>
+    </motion.div>
+  );
+}

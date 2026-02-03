@@ -10,10 +10,10 @@ export function IPImpactAnalysis() {
   const annualEstimate = totalLift45Percent * 2.5; // Multiplier for scale
 
   return (
-    <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="border-2 border-[#1770C0] rounded-2xl p-8 shadow-lg">
+    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-lg">
       {/* Header */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-[#091831] tracking-wide mb-2">
+        <h2 className="text-3xl font-bold text-white tracking-wide mb-2">
           IP PERFORMANCE = REVENUE OPPORTUNITY
         </h2>
         <div className="h-1.5 w-32 bg-[#1770C0]" />
@@ -22,96 +22,96 @@ export function IPImpactAnalysis() {
       {/* 4 Key Lifts - Large Display */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Logo Content */}
-        <div className="bg-white rounded-xl p-6 border-2 border-[#1770C0] shadow-sm">
+        <div className="bg-white rounded-xl p-6 border border-white/20 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#1770C0] flex items-center justify-center">
               <ThumbsUp className="w-5 h-5 text-white" />
             </div>
-            <div className="text-sm font-semibold text-gray-700">Logo Content</div>
+            <div className="text-sm font-semibold text-gray-300">Logo Content</div>
           </div>
           <div className="text-5xl font-bold text-[#1770C0] mb-2">
             +{ipMetrics.logoContentEngagementLift}%
           </div>
-          <div className="text-xs text-gray-600">Engagement Lift</div>
+          <div className="text-xs text-gray-400">Engagement Lift</div>
         </div>
 
         {/* Branded Posts */}
-        <div className="bg-white rounded-xl p-6 border-2 border-[#1770C0] shadow-sm">
+        <div className="bg-white rounded-xl p-6 border border-white/20 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#1770C0] flex items-center justify-center">
               <Award className="w-5 h-5 text-white" />
             </div>
-            <div className="text-sm font-semibold text-gray-700">Branded Posts</div>
+            <div className="text-sm font-semibold text-gray-300">Branded Posts</div>
           </div>
           <div className="text-5xl font-bold text-[#1770C0] mb-2">
             +{ipMetrics.brandedPostPerformanceLift}%
           </div>
-          <div className="text-xs text-gray-600">Performance Lift</div>
+          <div className="text-xs text-gray-400">Performance Lift</div>
         </div>
 
         {/* Collaboration */}
-        <div className="bg-white rounded-xl p-6 border-2 border-[#1770C0] shadow-sm">
+        <div className="bg-white rounded-xl p-6 border border-white/20 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#1770C0] flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <div className="text-sm font-semibold text-gray-700">Collaboration</div>
+            <div className="text-sm font-semibold text-gray-300">Collaboration</div>
           </div>
           <div className="text-5xl font-bold text-[#1770C0] mb-2">
             +{ipMetrics.collaborationContentLift}%
           </div>
-          <div className="text-xs text-gray-600">Content Lift</div>
+          <div className="text-xs text-gray-400">Content Lift</div>
         </div>
 
         {/* 90-Day Rolling */}
-        <div className="bg-white rounded-xl p-6 border-2 border-[#1770C0] shadow-sm">
+        <div className="bg-white rounded-xl p-6 border border-white/20 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-lg bg-[#1770C0] flex items-center justify-center">
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
-            <div className="text-sm font-semibold text-gray-700">90-Day Rolling</div>
+            <div className="text-sm font-semibold text-gray-300">90-Day Rolling</div>
           </div>
           <div className="text-5xl font-bold text-[#1770C0] mb-2">
             +{ipMetrics.ninetyDayRollingLift}%
           </div>
-          <div className="text-xs text-gray-600">Average Lift</div>
+          <div className="text-xs text-gray-400">Average Lift</div>
         </div>
       </div>
 
       {/* Explanatory Text */}
-      <div className="bg-white rounded-xl p-8 border-2 border-[#1770C0] mb-8">
-        <div className="text-2xl font-bold text-[#091831] mb-4">
+      <div className="bg-white rounded-xl p-8 border border-white/20 mb-8">
+        <div className="text-2xl font-bold text-white mb-4">
           When student-athletes use branded logos/content, their posts get{' '}
           <span className="text-[#1770C0]">45% MORE ENGAGEMENT</span>
         </div>
 
         <div className="mb-4">
-          <div className="text-lg font-bold text-[#091831] mb-3">
+          <div className="text-lg font-bold text-white mb-3">
             Nike, Wegmans, Sheetz benefit from:
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#1770C0] rounded-full" />
-              <span className="text-gray-700">Higher visibility with <strong>450M+ follower reach</strong></span>
+              <span className="text-gray-300">Higher visibility with <strong>450M+ follower reach</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#1770C0] rounded-full" />
-              <span className="text-gray-700">Authentic athlete endorsements</span>
+              <span className="text-gray-300">Authentic athlete endorsements</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#1770C0] rounded-full" />
-              <span className="text-gray-700">Consistent performance uplift</span>
+              <span className="text-gray-300">Consistent performance uplift</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-[#1770C0] rounded-full" />
-              <span className="text-gray-700">Data-driven optimization</span>
+              <span className="text-gray-300">Data-driven optimization</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Revenue Implications */}
-      <div className="bg-[#091831] rounded-xl p-8 border-2 border-[#1770C0] mb-8">
+      <div className="bg-[#091831] rounded-xl p-8 border border-white/20 mb-8">
         <div className="flex items-center gap-3 mb-4">
           <DollarSign className="w-8 h-8 text-[#1770C0]" />
           <h3 className="text-xl font-bold text-white">Revenue Implications</h3>
@@ -137,13 +137,13 @@ export function IPImpactAnalysis() {
       </div>
 
       {/* Comparison Chart */}
-      <div className="bg-white rounded-xl p-8 border-2 border-[#1770C0]">
-        <h3 className="text-lg font-bold text-[#091831] mb-6">Organic vs. Branded Performance</h3>
+      <div className="bg-white rounded-xl p-8 border border-white/20">
+        <h3 className="text-lg font-bold text-white mb-6">Organic vs. Branded Performance</h3>
 
         <div className="grid grid-cols-2 gap-6">
           {/* Organic Posts */}
           <div>
-            <div className="text-sm font-semibold text-gray-700 mb-3 text-center">
+            <div className="text-sm font-semibold text-gray-300 mb-3 text-center">
               Organic Posts (Baseline)
             </div>
             <div className="relative">
@@ -162,14 +162,14 @@ export function IPImpactAnalysis() {
 
           {/* Branded Posts */}
           <div>
-            <div className="text-sm font-semibold text-gray-700 mb-3 text-center">
+            <div className="text-sm font-semibold text-gray-300 mb-3 text-center">
               Branded Posts (+45% Lift)
             </div>
             <div className="relative">
               <div className="h-48 bg-gray-200 rounded-lg flex items-end justify-center p-4">
                 <div
                   className="w-full rounded-t-lg flex items-end justify-center pb-3 relative"
-                  style={{ height: '100%', background: 'linear-gradient(to top, #1770C0, #2080D0)' }}
+                  style={{ height: '100%', background: 'linear-gradient(to top, cyan-500, #2080D0)' }}
                 >
                   <div className="text-2xl font-bold text-white">
                     {(ipMetrics.engagementRateComparison.branded * 100).toFixed(0)}%
@@ -184,7 +184,7 @@ export function IPImpactAnalysis() {
         </div>
 
         <div className="mt-6 pt-6 border-t border-[#1770C0] text-center">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-400">
             Branded content consistently outperforms organic posts by{' '}
             <span className="font-bold text-[#1770C0]">
               {((ipMetrics.engagementRateComparison.difference / ipMetrics.engagementRateComparison.organic) * 100).toFixed(0)}%
@@ -195,7 +195,7 @@ export function IPImpactAnalysis() {
       </div>
 
       {/* Bottom Callout */}
-      <div className="mt-8 bg-gradient-to-r from-[#1770C0] to-[#2080D0] rounded-xl p-6 text-white text-center">
+      <div className="mt-8 bg-gradient-to-r from-[#1770C0] to-[#1770C0] rounded-xl p-6 text-white text-center">
         <div className="text-2xl font-bold mb-2">
           IP-Driven Content = Proven Revenue Growth
         </div>

@@ -1,0 +1,109 @@
+{
+  "generatedAt": "2026-01-30T19:50:00.000Z",
+  "dataSource": "Synthesized from JABA network analytics",
+  "totalPotentialImpact": 1585000,
+  "recommendations": [
+    {
+      "id": 1,
+      "title": "Expand Nike to SEC Powerhouses",
+      "description": "Add Auburn, LSU, and Texas A&M to Nike campaign. All 3 schools have 3+ high-engagement athletes ready to activate.",
+      "confidence": 94,
+      "difficulty": "Medium",
+      "estimatedImpact": 285000,
+      "implementation": "3-school bundle package at 25% discount",
+      "timeToROI": "30 days",
+      "dataSupporting": [
+        "Auburn has 4.5% avg engagement across volleyball/football",
+        "LSU baseball shows 2.3% engagement with strong follower base",
+        "Texas A&M already performing well with Nike - expand scope"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Activate 3 Unsponsored Tier 1 Athletes",
+      "description": "These athletes have engagement rates >4% but zero sponsorships. Quick wins with immediate revenue impact.",
+      "confidence": 98,
+      "difficulty": "Easy",
+      "estimatedImpact": 420000,
+      "implementation": "Tiered pricing packages ($2.5K-$15K per post)",
+      "timeToROI": "14 days",
+      "dataSupporting": [
+        "Auburn Volleyball: 4.1% engagement, 67.5K followers, $0 current revenue",
+        "Baylor Gymnastics: 4.5% engagement, 92K followers, $0 current revenue",
+        "Penn State Football: 4.8% engagement, 285K followers, underutilized"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Scale Wegmans to ACC Conference",
+      "description": "Wegmans has strong performance in Mid-Atlantic. Expand to Virginia, potentially 2 more ACC schools in region.",
+      "confidence": 87,
+      "difficulty": "Medium",
+      "estimatedImpact": 195000,
+      "implementation": "Regional expansion with local hero angles",
+      "timeToROI": "45 days",
+      "dataSupporting": [
+        "Virginia Track & Field: 1.6% engagement, perfect for regional brand",
+        "Geographic fit: ACC schools in Wegmans market territory",
+        "Current Wegmans campaign showing 89% positive sentiment"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Logo + Collab Content Strategy",
+      "description": "IP analysis shows 33% engagement lift when logo is present. Mandate logo in all brand activations.",
+      "confidence": 92,
+      "difficulty": "Easy",
+      "estimatedImpact": 520000,
+      "implementation": "Update brand guidelines + content templates",
+      "timeToROI": "7 days",
+      "dataSupporting": [
+        "organizations_roster_ip_*.json: 33% avg logo lift across network",
+        "Collaboration content: 27% lift observed",
+        "No downside - pure upside from simple content guideline"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Prioritize Rising Engagement Athletes",
+      "description": "Baylor Gymnastics shows 7-day engagement above 30-day average. Strike while momentum is high.",
+      "confidence": 89,
+      "difficulty": "Easy",
+      "estimatedImpact": 165000,
+      "implementation": "Quick-pitch packages to mid-market brands",
+      "timeToROI": "21 days",
+      "dataSupporting": [
+        "Baylor Gymnastics: 4.9% (7d) vs 4.7% (30d) - trending up",
+        "Auburn Volleyball: 4.5% (7d) vs 4.3% (30d) - momentum building",
+        "Perfect timing for mid-market brand entry"
+      ]
+    }
+  ],
+  "implementationPriority": [
+    {
+      "rank": 1,
+      "recommendationId": 2,
+      "reason": "Highest confidence, easiest implementation, 14-day ROI"
+    },
+    {
+      "rank": 2,
+      "recommendationId": 4,
+      "reason": "7-day ROI, easy difficulty, massive impact ($520K)"
+    },
+    {
+      "rank": 3,
+      "recommendationId": 5,
+      "reason": "Easy difficulty, good ROI, time-sensitive (momentum)"
+    },
+    {
+      "rank": 4,
+      "recommendationId": 1,
+      "reason": "High confidence, strong brand alignment"
+    },
+    {
+      "rank": 5,
+      "recommendationId": 3,
+      "reason": "Lower confidence, longer timeline, requires geographic expansion"
+    }
+  ]
+}

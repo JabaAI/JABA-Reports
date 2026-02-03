@@ -5,6 +5,8 @@
  * and performance analytics for the Playfly Sports partnership ecosystem.
  */
 
+import { getJABARosterTeams, getAllSchools } from './jabaRealData';
+
 // ============================================
 // INTERFACES & TYPES
 // ============================================
@@ -82,176 +84,59 @@ export interface ConferenceDistribution {
 // PLAYFLY MAX PARTNERS (Premium Tier)
 // ============================================
 
-export const PLAYFLY_MAX_PARTNERS: SchoolPartner[] = [
-  {
-    schoolId: 'auburn',
-    schoolName: 'Auburn University',
-    mascot: 'Tigers',
-    conference: 'SEC',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2022-07-01'),
-    athletesTracked: 485,
-    totalPosts: 6200,
-    totalLikes: 8500000,
-    totalComments: 245000,
-    averageEngagementRate: 0.42,
-    activeBrands: ['Nike', 'Coca-Cola', 'Buffalo Wild Wings', 'AT&T'],
-    topAthletesCount: 45,
-    mainSports: ['Football', 'Basketball', 'Baseball', 'Gymnastics'],
-    instagramFollowers: 95000000,
-    tiktokFollowers: 32000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'baylor',
-    schoolName: 'Baylor University',
-    mascot: 'Bears',
-    conference: 'Big 12',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2022-01-01'),
-    athletesTracked: 421,
-    totalPosts: 5727,
-    totalLikes: 5096433,
-    totalComments: 199140,
-    averageEngagementRate: 1.9046,
-    activeBrands: ['Dr Pepper', 'Adidas', 'Whataburger', 'H-E-B'],
-    topAthletesCount: 38,
-    mainSports: ['Football', 'Basketball', 'Volleyball', 'Equestrian'],
-    instagramFollowers: 78000000,
-    tiktokFollowers: 28000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'lsu',
-    schoolName: 'Louisiana State University',
-    mascot: 'Tigers',
-    conference: 'SEC',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2021-09-01'),
-    athletesTracked: 520,
-    totalPosts: 6850,
-    totalLikes: 9200000,
-    totalComments: 278000,
-    averageEngagementRate: 0.48,
-    activeBrands: ['Nike', 'Raising Cane\'s', 'Smoothie King', 'Gatorade'],
-    topAthletesCount: 52,
-    mainSports: ['Football', 'Basketball', 'Baseball', 'Gymnastics', 'Track & Field'],
-    instagramFollowers: 102000000,
-    tiktokFollowers: 35000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'penn-state',
-    schoolName: 'Penn State University',
-    mascot: 'Nittany Lions',
-    conference: 'Big Ten',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2021-07-01'),
-    athletesTracked: 565,
-    totalPosts: 7204,
-    totalLikes: 12114166,
-    totalComments: 280577,
-    averageEngagementRate: 0.3849,
-    activeBrands: ['Nike', 'Wegmans', 'Sheetz', 'State Farm'],
-    topAthletesCount: 58,
-    mainSports: ['Football', 'Basketball', 'Wrestling', 'Volleyball', 'Hockey'],
-    instagramFollowers: 115000000,
-    tiktokFollowers: 38000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'texas-am',
-    schoolName: 'Texas A&M University',
-    mascot: 'Aggies',
-    conference: 'SEC',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2022-06-01'),
-    athletesTracked: 273,
-    totalPosts: 3419,
-    totalLikes: 5934200,
-    totalComments: 140702,
-    averageEngagementRate: 0.4892,
-    activeBrands: ['Adidas', 'H-E-B', 'Dr Pepper', 'Chicken Salad Chick'],
-    topAthletesCount: 28,
-    mainSports: ['Football', 'Basketball', 'Baseball', 'Soccer'],
-    instagramFollowers: 68000000,
-    tiktokFollowers: 24000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'utsa',
-    schoolName: 'University of Texas at San Antonio',
-    mascot: 'Roadrunners',
-    conference: 'American',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2022-03-01'),
-    athletesTracked: 185,
-    totalPosts: 2100,
-    totalLikes: 1850000,
-    totalComments: 68000,
-    averageEngagementRate: 0.35,
-    activeBrands: ['Nike', 'Whataburger', 'Valero', 'H-E-B'],
-    topAthletesCount: 22,
-    mainSports: ['Football', 'Basketball', 'Track & Field'],
-    instagramFollowers: 42000000,
-    tiktokFollowers: 15000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'virginia',
-    schoolName: 'University of Virginia',
-    mascot: 'Cavaliers',
-    conference: 'ACC',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2022-01-15'),
-    athletesTracked: 395,
-    totalPosts: 4850,
-    totalLikes: 4200000,
-    totalComments: 152000,
-    averageEngagementRate: 0.38,
-    activeBrands: ['Nike', 'Chick-fil-A', 'Coca-Cola', 'Geico'],
-    topAthletesCount: 35,
-    mainSports: ['Football', 'Basketball', 'Lacrosse', 'Soccer'],
-    instagramFollowers: 62000000,
-    tiktokFollowers: 22000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-  {
-    schoolId: 'washington-state',
-    schoolName: 'Washington State University',
-    mascot: 'Cougars',
-    conference: 'Pac-12',
-    tier: PlayflyPartnerTier.MAX,
-    partnershipStartDate: new Date('2022-08-01'),
-    athletesTracked: 78,
-    totalPosts: 887,
-    totalLikes: 514916,
-    totalComments: 34756,
-    averageEngagementRate: 0.3809,
-    activeBrands: ['Nike', 'Dutch Bros', 'Alaska Airlines', 'Dairy Queen'],
-    topAthletesCount: 12,
-    mainSports: ['Football', 'Basketball', 'Soccer', 'Track & Field'],
-    instagramFollowers: 18000000,
-    tiktokFollowers: 8000000,
-    ipPerformanceLift: 45,
-    brandedContentLift: 38,
-    collaborationLift: 52,
-  },
-];
+/**
+ * Generate partner schools from real JABA data
+ * Aggregates all teams by school to create school-level metrics
+ */
+function generatePartnersFromRealData(): SchoolPartner[] {
+  const teams = getJABARosterTeams();
+  const schools = getAllSchools();
+
+  return schools.map((schoolName) => {
+    const schoolTeams = teams.filter(t => t.schoolName === schoolName);
+
+    // Aggregate metrics across all teams for this school
+    const totalFollowers = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.followers, 0);
+    const totalLikes = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.likes, 0);
+    const totalComments = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.comments, 0);
+    const totalContentCount = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.contentCount, 0);
+    const avgEngagementRate = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.engagementRate, 0) / schoolTeams.length;
+
+    // Get conference from first team
+    const conference = schoolTeams[0]?.conferenceName || 'Unknown';
+
+    // Get unique sports
+    const sports = [...new Set(schoolTeams.map(t => t.sport))].filter(s => s !== 'GENERAL');
+
+    // Create school ID from name
+    const schoolId = schoolName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    return {
+      schoolId,
+      schoolName,
+      mascot: '', // Not in JABA data
+      conference,
+      tier: PlayflyPartnerTier.MAX,
+      partnershipStartDate: new Date('2022-01-01'), // Default date
+      athletesTracked: 0, // Not directly available in team data
+      totalPosts: totalContentCount,
+      totalLikes,
+      totalComments,
+      averageEngagementRate: avgEngagementRate,
+      activeBrands: [], // Would need to parse from posts
+      topAthletesCount: 0, // Not available in team data
+      mainSports: sports,
+      instagramFollowers: totalFollowers,
+      tiktokFollowers: 0, // Combined in followers field
+      ipPerformanceLift: Math.round(avgEngagementRate * 100),
+      brandedContentLift: Math.round(avgEngagementRate * 80),
+      collaborationLift: Math.round(avgEngagementRate * 120),
+    };
+  });
+}
+
+// Generate partners from real data
+export const PLAYFLY_MAX_PARTNERS: SchoolPartner[] = generatePartnersFromRealData();
 
 // ============================================
 // CONFERENCE DISTRIBUTION
@@ -300,9 +185,12 @@ export const CONFERENCE_DISTRIBUTION: ConferenceDistribution[] = [
 // ============================================
 
 export function getNetworkMetrics(): NetworkMetrics {
-  const totalPostsTracked = 252171;
-  const totalPartnerSchools = 40;
-  const totalAthletesTracked = 15000;
+  const teams = getJABARosterTeams();
+
+  // Calculate from real data
+  const totalPostsTracked = teams.reduce((sum, t) => sum + t.metrics.ninetyDays.contentCount, 0);
+  const totalPartnerSchools = getAllSchools().length;
+  const totalAthletesTracked = 0; // Not available in team data
 
   // Calculate aggregate metrics from MAX partners
   const aggregateLikes = PLAYFLY_MAX_PARTNERS.reduce((sum, partner) => sum + partner.totalLikes, 0);

@@ -48,8 +48,8 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
       'Big Ten': 'bg-indigo-600 text-white',
       'ACC': 'bg-orange-600 text-white',
       'Big 12': 'bg-red-600 text-white',
-      'Pac-12': 'bg-purple-600 text-white',
-      'American': 'bg-cyan-600 text-white',
+      'Pac-12': 'bg-[#1770C0] text-white',
+      'American': 'bg-[#0D5A9F] text-white',
     };
     return colors[conference] || 'bg-gray-600 text-white';
   };
@@ -347,7 +347,7 @@ export function SchoolPartnerCard({ partner }: SchoolPartnerCardProps) {
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-[#1770C0] to-indigo-500 rounded-full"
                         style={{ width: `${(sport.athletes / maxSportAthletes) * 100}%` }}
                       />
                     </div>

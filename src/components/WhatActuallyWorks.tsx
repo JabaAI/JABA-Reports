@@ -40,7 +40,7 @@ export function WhatActuallyWorks() {
           bg: 'bg-purple-50',
           border: 'border-purple-200',
           text: 'text-purple-900',
-          badge: 'bg-purple-600',
+          badge: 'bg-[#1770C0]',
           icon: 'text-purple-600',
         };
       case 'green':

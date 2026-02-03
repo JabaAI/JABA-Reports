@@ -88,8 +88,8 @@ export function ActiveCampaigns() {
 
   const getStatusBadge = (status: 'active' | 'pending' | 'completed') => {
     const styles = {
-      active: 'bg-[#1770C0] text-white border-[#1770C0]',
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      active: 'bg-[#1770C0] text-black border-white/20',
+      pending: 'bg-blue-100 text-blue-800 border-blue-300',
       completed: 'bg-gray-100 text-gray-800 border-gray-300',
     };
 
@@ -102,29 +102,29 @@ export function ActiveCampaigns() {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-sm">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-[#091831] tracking-wide mb-2">
+        <h2 className="text-2xl font-bold text-white tracking-wide mb-2">
           ACTIVE CAMPAIGN PERFORMANCE
         </h2>
         <div className="h-1 w-24 bg-[#1770C0]" />
       </div>
 
       {/* Summary Stats */}
-      <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 mb-8 border-2 border-[#1770C0]">
+      <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 mb-8 border-2 border-white/20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
           <div>
             <div className="text-4xl font-bold text-[#1770C0]">{totalCampaigns}</div>
-            <div className="text-sm text-gray-700 mt-1">Active Campaigns</div>
+            <div className="text-sm text-gray-300 mt-1">Active Campaigns</div>
           </div>
           <div>
             <div className="text-4xl font-bold text-[#1770C0]">{totalAthletes}+</div>
-            <div className="text-sm text-gray-700 mt-1">Athletes Involved</div>
+            <div className="text-sm text-gray-300 mt-1">Athletes Involved</div>
           </div>
           <div>
             <div className="text-4xl font-bold text-[#1770C0]">{formatNumber(totalReach)}+</div>
-            <div className="text-sm text-gray-700 mt-1">Combined Reach</div>
+            <div className="text-sm text-gray-300 mt-1">Combined Reach</div>
           </div>
         </div>
       </div>
@@ -134,7 +134,7 @@ export function ActiveCampaigns() {
         {featuredCampaigns.map((campaign) => (
           <div
             key={campaign.id}
-            className="bg-white border-l-4 border-[#1770C0] border-2 border-gray-200 rounded-xl overflow-hidden hover:border-[#1770C0] transition-all duration-300"
+            className="bg-white border-l-4 border-white/20 border-2 border-gray-200 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300"
           >
             {/* Card Header */}
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
@@ -142,11 +142,11 @@ export function ActiveCampaigns() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <Briefcase className="w-6 h-6 text-[#1770C0]" />
-                    <h3 className="text-xl font-bold text-[#091831]">{campaign.brandName}</h3>
+                    <h3 className="text-xl font-bold text-white">{campaign.brandName}</h3>
                     {getStatusBadge(campaign.status)}
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">{campaign.description}</p>
-                  <div className="flex items-center gap-4 text-xs text-gray-600">
+                  <p className="text-sm text-gray-400 mb-3">{campaign.description}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-400">
                     <div className="flex items-center gap-1">
                       <Users className="w-3 h-3" />
                       <span>{campaign.athleteParticipants} athletes</span>
@@ -170,9 +170,9 @@ export function ActiveCampaigns() {
             <div className="grid grid-cols-4 gap-4 p-6 bg-white">
               <div className="text-center">
                 <div className="text-2xl font-bold text-[#1770C0]">{(campaign.engagementRate * 100).toFixed(1)}%</div>
-                <div className="text-xs text-gray-600 mt-1">Engagement Rate</div>
+                <div className="text-xs text-gray-400 mt-1">Engagement Rate</div>
                 {campaign.engagementRate > campaign.networkAvg && (
-                  <div className="text-xs text-green-600 font-semibold mt-1">
+                  <div className="text-xs text-[#3B9FD9] font-semibold mt-1">
                     +{(((campaign.engagementRate - campaign.networkAvg) / campaign.networkAvg) * 100).toFixed(0)}% vs network avg
                   </div>
                 )}
@@ -180,18 +180,18 @@ export function ActiveCampaigns() {
 
               <div className="text-center">
                 <div className="text-2xl font-bold text-[#1770C0]">{campaign.duration}</div>
-                <div className="text-xs text-gray-600 mt-1">Duration</div>
+                <div className="text-xs text-gray-400 mt-1">Duration</div>
               </div>
 
               <div className="text-center">
                 <div className="text-2xl font-bold text-[#1770C0]">{campaign.brandSentiment === 'positive' ? '92%' : 'N/A'}</div>
-                <div className="text-xs text-gray-600 mt-1">Brand Sentiment</div>
-                <div className="text-xs text-green-600 font-semibold mt-1">Positive</div>
+                <div className="text-xs text-gray-400 mt-1">Brand Sentiment</div>
+                <div className="text-xs text-[#3B9FD9] font-semibold mt-1">Positive</div>
               </div>
 
               <div className="text-center">
                 <div className="text-2xl font-bold text-[#1770C0]">${formatNumber(campaign.roi * 100000)}</div>
-                <div className="text-xs text-gray-600 mt-1">Estimated Value</div>
+                <div className="text-xs text-gray-400 mt-1">Estimated Value</div>
               </div>
             </div>
 
@@ -200,37 +200,37 @@ export function ActiveCampaigns() {
               <div className="p-6 bg-gray-50 border-t border-gray-200">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-xs text-gray-600 mb-1">Posts</div>
-                    <div className="text-xl font-bold text-gray-900">{campaign.keyMetrics.posts}</div>
+                    <div className="text-xs text-gray-400 mb-1">Posts</div>
+                    <div className="text-xl font-bold text-white">{campaign.keyMetrics.posts}</div>
                   </div>
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-xs text-gray-600 mb-1">Likes</div>
-                    <div className="text-xl font-bold text-gray-900">{formatNumber(campaign.keyMetrics.likes)}</div>
+                    <div className="text-xs text-gray-400 mb-1">Likes</div>
+                    <div className="text-xl font-bold text-white">{formatNumber(campaign.keyMetrics.likes)}</div>
                   </div>
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-xs text-gray-600 mb-1">Comments</div>
-                    <div className="text-xl font-bold text-gray-900">{formatNumber(campaign.keyMetrics.comments)}</div>
+                    <div className="text-xs text-gray-400 mb-1">Comments</div>
+                    <div className="text-xl font-bold text-white">{formatNumber(campaign.keyMetrics.comments)}</div>
                   </div>
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-xs text-gray-600 mb-1">Shares</div>
-                    <div className="text-xl font-bold text-gray-900">{formatNumber(campaign.keyMetrics.shares)}</div>
+                    <div className="text-xs text-gray-400 mb-1">Shares</div>
+                    <div className="text-xl font-bold text-white">{formatNumber(campaign.keyMetrics.shares)}</div>
                   </div>
                 </div>
 
                 {campaign.reachMultiplier && (
-                  <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0] mb-4">
-                    <div className="text-sm font-semibold text-[#091831] mb-1">Cross-School Amplification</div>
-                    <div className="text-xs text-gray-700">
+                  <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-white/20 mb-4">
+                    <div className="text-sm font-semibold text-white mb-1">Cross-School Amplification</div>
+                    <div className="text-xs text-gray-300">
                       Multi-school campaigns achieve <strong>{campaign.reachMultiplier}</strong> reach multiplier vs single-school campaigns
                     </div>
                   </div>
                 )}
 
                 {campaign.lifetimeValue && (
-                  <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-[#1770C0] mb-4">
+                  <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-lg p-4 border border-white/20 mb-4">
                     <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-[#1770C0]" />
-                      <div className="text-sm font-semibold text-[#091831]">Expected Lifetime Value</div>
+                      <div className="text-sm font-semibold text-white">Expected Lifetime Value</div>
                     </div>
                     <div className="text-2xl font-bold text-[#1770C0] mt-2">
                       ${formatNumber(campaign.lifetimeValue)}
@@ -241,7 +241,7 @@ export function ActiveCampaigns() {
                 {campaign.expansionNote && (
                   <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
                     <div className="text-sm font-semibold text-amber-900 mb-1">Expansion Opportunity</div>
-                    <div className="text-xs text-gray-700">{campaign.expansionNote}</div>
+                    <div className="text-xs text-gray-300">{campaign.expansionNote}</div>
                   </div>
                 )}
               </div>
@@ -250,7 +250,7 @@ export function ActiveCampaigns() {
             {/* Expand Button */}
             <button
               onClick={() => setExpandedCampaign(expandedCampaign === campaign.id ? null : campaign.id)}
-              className="w-full p-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 text-sm font-semibold text-gray-700"
+              className="w-full p-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 text-sm font-semibold text-gray-300"
             >
               {expandedCampaign === campaign.id ? (
                 <>
@@ -269,24 +269,24 @@ export function ActiveCampaigns() {
       </div>
 
       {/* Upsell Callout */}
-      <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 border-2 border-[#1770C0]">
+      <div style={{ backgroundColor: 'rgba(23, 112, 192, 0.1)' }} className="rounded-xl p-6 border-2 border-white/20">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#1770C0] flex items-center justify-center flex-shrink-0">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <div>
-            <div className="text-lg font-bold text-[#091831] mb-2">Upsell Opportunity</div>
-            <div className="text-sm text-gray-700 mb-3">
+            <div className="text-lg font-bold text-white mb-2">Upsell Opportunity</div>
+            <div className="text-sm text-gray-300 mb-3">
               Current campaigns show strong performance. Expand successful campaigns to additional schools for 2-3x reach amplification.
             </div>
             <div className="flex flex-wrap gap-2">
-              <div className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-[#091831] border border-[#1770C0]">
+              <div className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/20">
                 Expand Nike to +3 schools
               </div>
-              <div className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-[#091831] border border-[#1770C0]">
+              <div className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/20">
                 Replicate Wegmans model in ACC
               </div>
-              <div className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-[#091831] border border-[#1770C0]">
+              <div className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/20">
                 Scale Sheetz to Big Ten
               </div>
             </div>

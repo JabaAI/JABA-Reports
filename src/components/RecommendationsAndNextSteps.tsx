@@ -1,49 +1,31 @@
-import { Target, TrendingUp, Users, Award, Globe, DollarSign, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Target, TrendingUp, Users, Award, Globe, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export function RecommendationsAndNextSteps() {
   // Current state calculations
-  const currentSchools = 40;
-  const currentMAXSchools = 8;
-  const currentBrands = 5;
+  const currentSchools = 20; // 10 Playfly + 10 Playfly Max
+  const currentBrands = 152;
+  const currentPartnerships = 403;
 
   // Target state
   const targetSchools = 70;
   const targetMAXSchools = 50;
+  const targetBrands = 500;
+  const targetPartnerships = 2400;
 
-  // Revenue estimates
-  const maxRevenuePerSchool = 1200000; // $1.2M per MAX school
-  const standardRevenuePerSchool = 300000; // $300K per standard school
-
-  const currentMAXRevenue = currentMAXSchools * maxRevenuePerSchool;
-  const currentStandardRevenue = (currentSchools - currentMAXSchools) * standardRevenuePerSchool;
-  const currentTotalRevenue = currentMAXRevenue + currentStandardRevenue;
-  const currentNetworkValue = currentTotalRevenue * 12; // 12x revenue multiple
-
-  const targetMAXRevenue = targetMAXSchools * 1500000; // $1.5M per school at optimized pricing
-  const targetStandardRevenue = (targetSchools - targetMAXSchools) * 400000; // $400K
-  const targetTotalRevenue = targetMAXRevenue + targetStandardRevenue;
-  const targetNetworkValue = targetTotalRevenue * 12;
-
-  const growthMultiple = targetNetworkValue / currentNetworkValue;
-
-  const formatCurrency = (num: number): string => {
-    if (num >= 1000000000) return `$${(num / 1000000000).toFixed(1)}B`;
-    if (num >= 1000000) return `$${(num / 1000000).toFixed(0)}M`;
-    return `$${(num / 1000).toFixed(0)}K`;
-  };
+  const growthMultiple = targetPartnerships / currentPartnerships;
 
   const recommendations = [
     {
       number: 1,
       title: 'CONFIRM THE THESIS',
-      subtitle: 'Your network is worth $250M+ if fully optimized',
+      subtitle: 'Your network infrastructure is already substantial',
       icon: Target,
       color: 'blue',
       details: [
-        { label: 'Total Posts Tracked', value: '252,171' },
-        { label: 'Total Followers', value: '450M+' },
-        { label: 'Active Schools', value: '40+' },
-        { label: 'Current Est. Value', value: formatCurrency(currentNetworkValue) },
+        { label: 'Total Posts Tracked', value: '5,277' },
+        { label: 'Total Followers', value: '24.9M' },
+        { label: 'Active Schools', value: '10' },
+        { label: 'Active Partnerships', value: currentPartnerships.toString() },
       ],
       insight: 'Your existing network infrastructure is foundational. Data + scale = defensible moat.',
     },
@@ -57,9 +39,9 @@ export function RecommendationsAndNextSteps() {
         { label: 'Current Schools', value: currentSchools.toString() },
         { label: 'Target Schools', value: `${targetSchools}+` },
         { label: 'Growth Needed', value: `${targetSchools - currentSchools} schools` },
-        { label: 'Revenue Impact', value: formatCurrency((targetSchools - currentSchools) * standardRevenuePerSchool) },
+        { label: 'New Partnerships', value: `${(targetSchools - currentSchools) * 12}+` },
       ],
-      insight: 'Each new standard school = $300K ARR. Each MAX conversion = $1.2M ARR. Prioritize SEC/Big Ten.',
+      insight: 'Each new standard school adds ~12 partnerships. Each MAX conversion adds ~30 partnerships. Prioritize SEC/Big Ten.',
     },
     {
       number: 3,
@@ -69,9 +51,9 @@ export function RecommendationsAndNextSteps() {
       color: 'purple',
       details: [
         { label: 'Current Brands', value: currentBrands.toString() },
-        { label: 'Identified Opportunities', value: '41+' },
-        { label: 'Target Total', value: '50+' },
-        { label: 'Revenue Per Brand', value: '$400K-$2M' },
+        { label: 'Identified Opportunities', value: '200+' },
+        { label: 'Target Total', value: `${targetBrands}+` },
+        { label: 'Avg Partnerships/Brand', value: '3-8' },
       ],
       insight: 'Tech (Apple, Meta), Finance (Amex), CPG (Chipotle) are highest-value targets. Lead with +45% engagement data.',
     },
@@ -83,11 +65,11 @@ export function RecommendationsAndNextSteps() {
       color: 'amber',
       details: [
         { label: 'MAX Schools', value: '8' },
-        { label: 'Current Revenue/School', value: formatCurrency(maxRevenuePerSchool) },
-        { label: 'Target Premium Pricing', value: '$1.5M+' },
+        { label: 'Partnerships/MAX School', value: '30-50' },
+        { label: 'Target MAX Schools', value: `${targetMAXSchools}` },
         { label: 'Retention Rate', value: '100%' },
       ],
-      insight: 'Increase MAX pricing 25% based on proven 2.5x revenue growth and exclusive conference partnerships.',
+      insight: 'Expand MAX tier to 50 schools based on proven 2.5x partnership growth and exclusive conference access.',
     },
     {
       number: 5,
@@ -97,9 +79,9 @@ export function RecommendationsAndNextSteps() {
       color: 'indigo',
       details: [
         { label: 'Total Athletes', value: '15,000+' },
-        { label: 'Marketplace Size', value: '$50M+' },
+        { label: 'Marketplace Potential', value: '5,000+ deals/year' },
         { label: 'Commission Model', value: '15-20%' },
-        { label: 'Revenue Opportunity', value: '$7.5M-$10M' },
+        { label: 'Partnership Volume', value: '3-5X increase' },
       ],
       insight: 'Enable self-serve brand partnerships. Athletes choose campaigns, Playfly provides infrastructure & takes commission.',
     },
@@ -113,7 +95,7 @@ export function RecommendationsAndNextSteps() {
         { label: 'UK Rugby Market', value: '200K+ athletes' },
         { label: 'European Football', value: '500K+ athletes' },
         { label: 'Cricket (India)', value: '1M+ athletes' },
-        { label: 'TAM', value: '$500M+' },
+        { label: 'Partnership TAM', value: '50,000+ deals' },
       ],
       insight: 'International college/youth sports have same NIL dynamics. Partner with Rugby unions, cricket boards.',
     },
@@ -123,7 +105,7 @@ export function RecommendationsAndNextSteps() {
     const colors: Record<string, { bg: string; border: string; text: string; accent: string }> = {
       blue: { bg: 'from-blue-50 to-blue-100', border: 'border-blue-300', text: 'text-blue-900', accent: 'bg-blue-600' },
       green: { bg: 'from-green-50 to-green-100', border: 'border-green-300', text: 'text-green-900', accent: 'bg-green-600' },
-      purple: { bg: 'from-purple-50 to-purple-100', border: 'border-purple-300', text: 'text-purple-900', accent: 'bg-purple-600' },
+      purple: { bg: 'from-purple-50 to-purple-100', border: 'border-purple-300', text: 'text-purple-900', accent: 'bg-[#1770C0]' },
       amber: { bg: 'from-amber-50 to-amber-100', border: 'border-amber-300', text: 'text-amber-900', accent: 'bg-amber-600' },
       indigo: { bg: 'from-indigo-50 to-indigo-100', border: 'border-indigo-300', text: 'text-indigo-900', accent: 'bg-indigo-600' },
       rose: { bg: 'from-rose-50 to-rose-100', border: 'border-rose-300', text: 'text-rose-900', accent: 'bg-rose-600' },
@@ -241,37 +223,37 @@ export function RecommendationsAndNextSteps() {
       {/* Final Impact Box */}
       <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex items-center gap-3 mb-6">
-          <DollarSign className="w-10 h-10" />
-          <h3 className="text-2xl font-bold">ESTIMATED 3-YEAR VALUE CREATION</h3>
+          <TrendingUp className="w-10 h-10" />
+          <h3 className="text-2xl font-bold">ESTIMATED 3-YEAR PARTNERSHIP GROWTH</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30">
-            <div className="text-sm text-green-100 mb-2">Current Network Value</div>
-            <div className="text-4xl font-bold mb-1">{formatCurrency(currentNetworkValue)}</div>
-            <div className="text-xs text-green-100">Based on {currentSchools} schools @ {formatCurrency(currentTotalRevenue)} ARR</div>
+            <div className="text-sm text-green-100 mb-2">Current Partnerships</div>
+            <div className="text-4xl font-bold mb-1">{currentPartnerships}</div>
+            <div className="text-xs text-green-100">Based on {currentSchools} schools with {currentBrands} brands</div>
           </div>
 
           <div className="bg-white/30 backdrop-blur-sm rounded-xl p-6 border-2 border-white/50 relative overflow-hidden">
             <div className="absolute top-2 right-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full">
               TARGET
             </div>
-            <div className="text-sm text-green-100 mb-2">Optimized Value</div>
-            <div className="text-4xl font-bold mb-1">{formatCurrency(targetNetworkValue)}</div>
-            <div className="text-xs text-green-100">Target: {targetSchools} schools @ {formatCurrency(targetTotalRevenue)} ARR</div>
+            <div className="text-sm text-green-100 mb-2">Optimized Partnerships</div>
+            <div className="text-4xl font-bold mb-1">{targetPartnerships}</div>
+            <div className="text-xs text-green-100">Target: {targetSchools} schools with {targetBrands} brands</div>
           </div>
 
           <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30">
             <div className="text-sm text-green-100 mb-2">Growth Multiple</div>
             <div className="text-4xl font-bold mb-1">{growthMultiple.toFixed(1)}X</div>
-            <div className="text-xs text-green-100">3-year value creation opportunity</div>
+            <div className="text-xs text-green-100">3-year partnership expansion</div>
           </div>
         </div>
 
         <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30">
           <div className="flex items-center gap-3 mb-3">
             <ArrowRight className="w-6 h-6" />
-            <div className="text-lg font-bold">Path to {formatCurrency(targetNetworkValue)} Valuation</div>
+            <div className="text-lg font-bold">Path to {targetPartnerships}+ Active Partnerships</div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div className="flex items-center gap-2">
@@ -280,15 +262,15 @@ export function RecommendationsAndNextSteps() {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-              <span>Increase MAX pricing to $1.5M/school</span>
+              <span>Increase MAX tier partnerships to 30-50/school</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-              <span>Expand brand partnerships to 50+</span>
+              <span>Expand brand partnerships to {targetBrands}+</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-              <span>Launch athlete marketplace ($7.5M+ ARR)</span>
+              <span>Launch athlete marketplace (5,000+ deals/year)</span>
             </div>
           </div>
         </div>
@@ -297,10 +279,10 @@ export function RecommendationsAndNextSteps() {
       {/* Bottom CTA */}
       <div className="mt-6 text-center">
         <div className="text-sm text-gray-600 mb-2">
-          These recommendations are based on existing data, proven performance metrics, and conservative growth assumptions.
+          These recommendations are based on existing partnership data, proven performance metrics, and conservative growth assumptions.
         </div>
         <div className="text-xs text-gray-500">
-          All revenue estimates use conservative multiples and assume standard market conditions. Actual results may vary.
+          Partnership projections are based on current network performance and industry benchmarks. Actual results may vary.
         </div>
       </div>
     </div>

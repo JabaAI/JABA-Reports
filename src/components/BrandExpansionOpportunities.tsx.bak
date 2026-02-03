@@ -1,0 +1,538 @@
+import { useState, useMemo } from 'react';
+import { Target, CheckCircle, ArrowRight, Monitor, AlertTriangle, TrendingUp, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
+import { getAllSchools, getTeamsBySchool } from '../data/jabaRealData';
+
+/**
+ * BRAND EXPANSION OPPORTUNITIES
+ *
+ * Purpose: Illustrative example showing brand channel distribution opportunities
+ * Demonstrates athlete-only vs. team page expansion potential
+ * NOTE: Uses hypothetical brand data for demonstration purposes
+ */
+
+type SortField = 'school' | 'followers' | 'opportunity';
+type SortDirection = 'asc' | 'desc';
+
+interface SchoolBrandData {
+  schoolName: string;
+  conference: string;
+  brandAPosts: number;  // Illustrative Brand A (National Apparel)
+  brandBPosts: number;  // Illustrative Brand B (Regional Food)
+  brandCPosts: number;  // Illustrative Brand C (Regional Retail)
+  teamFollowers: number;
+  avgEngagement: number;
+  brandAOpportunity: number;
+  brandBOpportunity: number;
+  brandCOpportunity: number;
+  totalOpportunity: number;
+}
+
+export function BrandExpansionOpportunities() {
+  const [sortField, setSortField] = useState<SortField>('opportunity');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [expandedSchool, setExpandedSchool] = useState<string | null>(null);
+
+  // Generate brand data for all schools
+  const schoolBrandData: SchoolBrandData[] = useMemo(() => {
+    const schools = getAllSchools();
+
+    // ILLUSTRATIVE EXAMPLE: Hypothetical brand athlete post data
+    // Brand A = National Apparel Brand | Brand B = Regional Food Brand | Brand C = Regional Retail Brand
+    const brandPostsMap: Record<string, { brandA: number; brandB: number; brandC: number }> = {
+      'Auburn University': { brandA: 12, brandB: 8, brandC: 10 },
+      'The University of Alabama': { brandA: 8, brandB: 5, brandC: 6 },
+      'Louisiana State University': { brandA: 6, brandB: 4, brandC: 5 },
+      'Texas A&M': { brandA: 5, brandB: 3, brandC: 4 },
+      'Penn State University': { brandA: 4, brandB: 9, brandC: 11 },
+      'Oregon': { brandA: 9, brandB: 0, brandC: 0 },
+      'Oregon State University': { brandA: 7, brandB: 0, brandC: 0 },
+      'The University of Arizona': { brandA: 6, brandB: 0, brandC: 0 },
+      'University of Southern California (USC)': { brandA: 11, brandB: 0, brandC: 0 },
+      'Michigan State': { brandA: 5, brandB: 0, brandC: 0 },
+      'Tennessee': { brandA: 7, brandB: 0, brandC: 0 },
+      'Nebraska': { brandA: 4, brandB: 0, brandC: 0 },
+      'Maryland': { brandA: 3, brandB: 6, brandC: 7 },
+    };
+
+    return schools.map(schoolName => {
+      const schoolTeams = getTeamsBySchool(schoolName);
+
+      const teamFollowers = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.followers, 0);
+      const avgEngagement = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.engagementRate, 0) / schoolTeams.length;
+
+      const brandPosts = brandPostsMap[schoolName] || { brandA: 0, brandB: 0, brandC: 0 };
+
+      // Calculate opportunity for each brand: engaged users × $4/post × 52 weeks
+      const engagedUsers = teamFollowers * avgEngagement;
+      const opportunityPerBrand = engagedUsers * 4 * 52;
+
+      // Only count opportunity if brand has athlete posts (meaning they're in that school)
+      const brandAOpportunity = brandPosts.brandA > 0 ? opportunityPerBrand : 0;
+      const brandBOpportunity = brandPosts.brandB > 0 ? opportunityPerBrand : 0;
+      const brandCOpportunity = brandPosts.brandC > 0 ? opportunityPerBrand : 0;
+
+      const conference = schoolTeams[0]?.conferenceName || 'Unknown';
+
+      return {
+        schoolName,
+        conference,
+        brandAPosts: brandPosts.brandA,
+        brandBPosts: brandPosts.brandB,
+        brandCPosts: brandPosts.brandC,
+        teamFollowers,
+        avgEngagement,
+        brandAOpportunity,
+        brandBOpportunity,
+        brandCOpportunity,
+        totalOpportunity: brandAOpportunity + brandBOpportunity + brandCOpportunity,
+      };
+    });
+  }, []);
+
+  // Sort schools
+  const sortedSchools = useMemo(() => {
+    const sorted = [...schoolBrandData];
+    sorted.sort((a, b) => {
+      let aVal: number | string = 0;
+      let bVal: number | string = 0;
+
+      if (sortField === 'school') {
+        aVal = a.schoolName;
+        bVal = b.schoolName;
+      } else if (sortField === 'followers') {
+        aVal = a.teamFollowers;
+        bVal = b.teamFollowers;
+      } else if (sortField === 'opportunity') {
+        aVal = a.totalOpportunity;
+        bVal = b.totalOpportunity;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+
+      return sortDirection === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
+    });
+
+    return sorted;
+  }, [schoolBrandData, sortField, sortDirection]);
+
+  // Network-level calculations
+  const totalBrandAPosts = schoolBrandData.reduce((sum, s) => sum + s.brandAPosts, 0);
+  const totalBrandBPosts = schoolBrandData.reduce((sum, s) => sum + s.brandBPosts, 0);
+  const totalBrandCPosts = schoolBrandData.reduce((sum, s) => sum + s.brandCPosts, 0);
+
+  const brandAEMV = totalBrandAPosts * 2000; // $2K per athlete post
+  const brandBEMV = totalBrandBPosts * 2000;
+  const brandCEMV = totalBrandCPosts * 2000;
+
+  const totalBrandAOpportunity = schoolBrandData.reduce((sum, s) => sum + s.brandAOpportunity, 0);
+  const totalBrandBOpportunity = schoolBrandData.reduce((sum, s) => sum + s.brandBOpportunity, 0);
+  const totalBrandCOpportunity = schoolBrandData.reduce((sum, s) => sum + s.brandCOpportunity, 0);
+
+  const schoolsWithBrandA = schoolBrandData.filter(s => s.brandAPosts > 0).length;
+  const schoolsWithBrandB = schoolBrandData.filter(s => s.brandBPosts > 0).length;
+  const schoolsWithBrandC = schoolBrandData.filter(s => s.brandCPosts > 0).length;
+
+  // Top 10 schools by opportunity
+  const top10Schools = [...sortedSchools].slice(0, 10);
+
+  const formatCurrency = (value: number): string => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value.toFixed(0)}`;
+  };
+
+  const formatNumber = (value: number): string => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+    return value.toLocaleString();
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'school' ? 'asc' : 'desc');
+    }
+  };
+
+  return (
+    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-sm">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#1770C0] to-[#1770C0] flex items-center justify-center">
+            <Target className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-white tracking-wide">
+              BRAND EXPANSION OPPORTUNITIES
+            </h2>
+            <p className="text-[#1770C0] font-semibold text-sm">Illustrative Example - Channel Distribution Opportunities</p>
+            <p className="text-xs text-gray-400 mt-1">* Hypothetical brand data for demonstration</p>
+          </div>
+        </div>
+        <div className="h-1.5 w-32 bg-gradient-to-r from-[#1770C0] to-[#1770C0]" />
+      </div>
+
+      {/* SECTION 1: Three-Column Brand Channel Distribution */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4">Brand Channel Distribution (Network Level)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Column 1: Athlete-Only Brands (Orange - Underutilized) */}
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-400">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="w-6 h-6 text-orange-600" />
+              <h4 className="text-lg font-bold text-white">Athlete-Only Brands</h4>
+            </div>
+            <div className="text-xs text-orange-700 font-semibold mb-4 uppercase">UNDERUTILIZED - Can Expand to Team Pages</div>
+
+            <div className="space-y-4">
+              <div className="bg-white rounded-lg p-4 border-2 border-orange-300">
+                <div className="font-bold text-white mb-2">Brand A (National Apparel)</div>
+                <div className="text-sm text-gray-300 space-y-1">
+                  <div>{totalBrandAPosts} athlete posts across {schoolsWithBrandA} schools</div>
+                  <div className="text-green-600 font-semibold">{formatCurrency(brandAEMV)} current EMV</div>
+                  <div className="text-[#1770C0] font-bold">{formatCurrency(totalBrandAOpportunity)} team page opportunity</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-4 border-2 border-orange-300">
+                <div className="font-bold text-white mb-2">Brand B (Regional Food)</div>
+                <div className="text-sm text-gray-300 space-y-1">
+                  <div>{totalBrandBPosts} athlete posts across {schoolsWithBrandB} schools</div>
+                  <div className="text-green-600 font-semibold">{formatCurrency(brandBEMV)} current EMV</div>
+                  <div className="text-[#1770C0] font-bold">{formatCurrency(totalBrandBOpportunity)} team page opportunity</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-4 border-2 border-orange-300">
+                <div className="font-bold text-white mb-2">Brand C (Regional Retail)</div>
+                <div className="text-sm text-gray-300 space-y-1">
+                  <div>{totalBrandCPosts} athlete posts across {schoolsWithBrandC} schools</div>
+                  <div className="text-green-600 font-semibold">{formatCurrency(brandCEMV)} current EMV</div>
+                  <div className="text-[#1770C0] font-bold">{formatCurrency(totalBrandCOpportunity)} team page opportunity</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 bg-orange-100 rounded-lg p-3 border border-orange-400">
+              <div className="text-xs font-semibold text-orange-900">
+                ⚠️ These illustrative brands are in {schoolsWithBrandA}-{schoolsWithBrandB} schools for athlete deals. Imagine them on all schools' team pages.
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Team-Page-Only Brands (Blue - Aspirational) */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-[#1770C0]">
+            <div className="flex items-center gap-2 mb-4">
+              <Monitor className="w-6 h-6 text-[#1770C0]" />
+              <h4 className="text-lg font-bold text-white">Team-Page-Only Brands</h4>
+            </div>
+            <div className="text-xs text-[#1770C0] font-semibold mb-4 uppercase">Opportunity to Create</div>
+
+            <div className="bg-[#1770C0]/20 rounded-lg p-6 border-2 border-[#1770C0] text-center h-64 flex flex-col items-center justify-center">
+              <div className="text-6xl mb-4">📺</div>
+              <div className="font-bold text-white mb-2">Currently 0 brands</div>
+              <div className="text-sm text-gray-400">
+                Opportunity: Bring in brands that ONLY want team page reach (cheaper than athletes)
+              </div>
+            </div>
+
+            <div className="mt-4 bg-[#1770C0]/20 rounded-lg p-3 border border-[#1770C0]">
+              <div className="text-xs font-semibold text-black">
+                💡 Regional brands, B2B companies, universities could use team pages exclusively
+              </div>
+            </div>
+          </div>
+
+          {/* Column 3: Both Channels (Green - Goal State) */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-400">
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              <h4 className="text-lg font-bold text-white">Both Channels (Maximized)</h4>
+            </div>
+            <div className="text-xs text-green-700 font-semibold mb-4 uppercase">Goal State - Full Network Activation</div>
+
+            <div className="bg-green-100 rounded-lg p-6 border-2 border-green-300 text-center h-64 flex flex-col items-center justify-center">
+              <div className="text-6xl mb-4">🎯</div>
+              <div className="font-bold text-white mb-2">Currently 0 brands</div>
+              <div className="text-sm text-gray-400">
+                Goal: Move athlete-only brands here by activating team pages across all schools
+              </div>
+            </div>
+
+            <div className="mt-4 bg-green-100 rounded-lg p-3 border border-green-400">
+              <div className="text-xs font-semibold text-green-900">
+                ✓ Brands using both channels = maximum ROI & network leverage
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2: Brand Expansion Opportunity by School (Interactive Table) */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-white">Brand Expansion Opportunity by School</h3>
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <ArrowUpDown className="w-4 h-4" />
+            <span>Click headers to sort</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border-2 border-[#1770C0] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-[#1770C0] to-[#1770C0] text-white">
+                <tr>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('school')}
+                  >
+                    <div className="flex items-center gap-2">
+                      SCHOOL
+                      {sortField === 'school' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-bold">BRAND A<br/>(Athlete Only?)</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold">BRAND B<br/>(Athlete Only?)</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold">BRAND C<br/>(Athlete Only?)</th>
+                  <th
+                    className="px-4 py-3 text-right text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('followers')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      TEAM FOLLOWERS
+                      {sortField === 'followers' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-right text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('opportunity')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      COMBINED OPPORTUNITY
+                      {sortField === 'opportunity' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-bold">EXPAND</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedSchools.map((school, idx) => (
+                  <tr
+                    key={school.schoolName}
+                    className={`border-b border-gray-200 ${idx % 2 === 0 ? 'bg-[#1770C0]/10' : 'bg-white'} hover:bg-[#1770C0]/100 transition-colors`}
+                  >
+                    <td className="px-4 py-3 font-semibold text-white">{school.schoolName}</td>
+                    <td className="px-4 py-3 text-center">
+                      {school.brandAPosts > 0 ? (
+                        <div className="flex flex-col items-center">
+                          <CheckCircle className="w-5 h-5 text-[#1770C0]" />
+                          <div className="text-xs text-gray-400">{school.brandAPosts} posts</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {school.brandBPosts > 0 ? (
+                        <div className="flex flex-col items-center">
+                          <CheckCircle className="w-5 h-5 text-[#1770C0]" />
+                          <div className="text-xs text-gray-400">{school.brandBPosts} posts</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {school.brandCPosts > 0 ? (
+                        <div className="flex flex-col items-center">
+                          <CheckCircle className="w-5 h-5 text-[#1770C0]" />
+                          <div className="text-xs text-gray-400">{school.brandCPosts} posts</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-[#1770C0]">{formatNumber(school.teamFollowers)}</td>
+                    <td className="px-4 py-3 text-right font-bold text-[#1770C0]">{formatCurrency(school.totalOpportunity)}</td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => setExpandedSchool(expandedSchool === school.schoolName ? null : school.schoolName)}
+                        className="text-[#1770C0] hover:text-black transition-colors"
+                      >
+                        {expandedSchool === school.schoolName ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION 3: School-Specific Brand Gaps (Expandable) */}
+        {expandedSchool && (() => {
+          const school = sortedSchools.find(s => s.schoolName === expandedSchool);
+          if (!school) return null;
+
+          return (
+            <div className="mt-4 bg-[#1770C0]/10 rounded-xl p-6 border-2 border-[#1770C0]">
+              <h4 className="text-lg font-bold text-white mb-4">{school.schoolName} - Brand Gap Detail</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {school.brandAPosts > 0 && (
+                  <div className="bg-white rounded-lg p-4 border border-orange-300">
+                    <div className="font-bold text-white mb-2">Brand A (National Apparel)</div>
+                    <div className="text-sm space-y-1">
+                      <div className="text-gray-300">{school.brandAPosts} athlete posts</div>
+                      <div className="text-red-600 font-semibold">→ 0 team posts</div>
+                      <div className="text-gray-400">on {formatNumber(school.teamFollowers)} followers</div>
+                      <div className="text-orange-600 font-bold mt-2">{formatCurrency(school.brandAOpportunity)} opportunity</div>
+                    </div>
+                  </div>
+                )}
+                {school.brandBPosts > 0 && (
+                  <div className="bg-white rounded-lg p-4 border border-orange-300">
+                    <div className="font-bold text-white mb-2">Brand B (Regional Food)</div>
+                    <div className="text-sm space-y-1">
+                      <div className="text-gray-300">{school.brandBPosts} athlete posts</div>
+                      <div className="text-red-600 font-semibold">→ 0 team posts</div>
+                      <div className="text-gray-400">on {formatNumber(school.teamFollowers)} followers</div>
+                      <div className="text-orange-600 font-bold mt-2">{formatCurrency(school.brandBOpportunity)} opportunity</div>
+                    </div>
+                  </div>
+                )}
+                {school.brandCPosts > 0 && (
+                  <div className="bg-white rounded-lg p-4 border border-orange-300">
+                    <div className="font-bold text-white mb-2">Brand C (Regional Retail)</div>
+                    <div className="text-sm space-y-1">
+                      <div className="text-gray-300">{school.brandCPosts} athlete posts</div>
+                      <div className="text-red-600 font-semibold">→ 0 team posts</div>
+                      <div className="text-gray-400">on {formatNumber(school.teamFollowers)} followers</div>
+                      <div className="text-orange-600 font-bold mt-2">{formatCurrency(school.brandCOpportunity)} opportunity</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 bg-[#1770C0]/20 rounded-lg p-4 border border-[#1770C0]">
+                <div className="font-bold text-white">{school.schoolName} Total: {formatCurrency(school.totalOpportunity)}</div>
+                <div className="text-sm text-gray-300">If all active brands expand to team pages</div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* SECTION 4: Top 10 Schools by Brand Expansion Opportunity */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <TrendingUp className="w-6 h-6 text-purple-600" />
+          Top 10 Schools by Brand Expansion Opportunity
+        </h3>
+        <div className="bg-white rounded-xl border-2 border-[#1770C0] overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-[#1770C0] to-indigo-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-bold">RANK</th>
+                <th className="px-4 py-3 text-left text-sm font-bold">SCHOOL</th>
+                <th className="px-4 py-3 text-right text-sm font-bold">TOTAL TEAM FOLLOWERS</th>
+                <th className="px-4 py-3 text-right text-sm font-bold">3-BRAND OPPORTUNITY</th>
+              </tr>
+            </thead>
+            <tbody>
+              {top10Schools.map((school, idx) => (
+                <tr
+                  key={school.schoolName}
+                  className={`border-b border-gray-200 ${idx % 2 === 0 ? 'bg-[#1770C0]/10' : 'bg-white'}`}
+                >
+                  <td className="px-4 py-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                      idx < 3 ? 'bg-gradient-to-br from-[#1770C0] to-[#1770C0] text-white' : 'bg-gray-200 text-gray-300'
+                    }`}>
+                      {idx + 1}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-white">{school.schoolName}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-[#1770C0]">{formatNumber(school.teamFollowers)}</td>
+                  <td className="px-4 py-3 text-right font-bold text-orange-600">{formatCurrency(school.totalOpportunity)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* SECTION 5: "Move Brands Across the Network" */}
+      <div className="bg-gradient-to-r from-[#1770C0] to-blue-700 rounded-xl p-8 text-white shadow-xl border-2 border-blue-800">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Target className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold mb-2">Move Brands Across the Network</h3>
+            <p className="text-lg opacity-95">
+              These 3 illustrative brands are currently <span className="font-bold">athlete-only</span> - expand to team pages
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
+            <div className="font-bold text-lg mb-2">Brand A (National Apparel):</div>
+            <div className="text-3xl font-bold text-white">{formatCurrency(totalBrandAOpportunity)}</div>
+            <div className="text-sm opacity-90">annual team page revenue</div>
+          </div>
+          <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
+            <div className="font-bold text-lg mb-2">Brand B (Regional Food):</div>
+            <div className="text-3xl font-bold text-white">{formatCurrency(totalBrandBOpportunity)}</div>
+            <div className="text-sm opacity-90">annual team page revenue</div>
+          </div>
+          <div className="bg-white/10 rounded-lg p-4 backdrop-blur">
+            <div className="font-bold text-lg mb-2">Brand C (Regional Retail):</div>
+            <div className="text-3xl font-bold text-white">{formatCurrency(totalBrandCOpportunity)}</div>
+            <div className="text-sm opacity-90">annual team page revenue</div>
+          </div>
+        </div>
+
+        <div className="bg-blue-900/50 rounded-lg p-6 border-2 border-[#1770C0] mb-6">
+          <div className="text-xl font-bold mb-2">
+            Combined: <span className="text-white">{formatCurrency(totalBrandAOpportunity + totalBrandBOpportunity + totalBrandCOpportunity)}</span>
+          </div>
+          <div className="text-lg opacity-90">From same 3 illustrative brands across team pages</div>
+          <div className="text-sm opacity-75 mt-2">With additional brands filling gaps: significant total opportunity</div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button className="bg-white text-[#1770C0] px-6 py-4 rounded-xl font-bold hover:bg-[#1770C0]/50 transition-all shadow-lg flex items-center justify-center gap-2">
+            <span>Activate Brand A Team Pages</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+          <button className="bg-white text-[#1770C0] px-6 py-4 rounded-xl font-bold hover:bg-[#1770C0]/50 transition-all shadow-lg flex items-center justify-center gap-2">
+            <span>Activate Brand B Team Pages</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+          <button className="bg-white text-[#1770C0] px-6 py-4 rounded-xl font-bold hover:bg-[#1770C0]/50 transition-all shadow-lg flex items-center justify-center gap-2">
+            <span>Activate Brand C Team Pages</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Data Attribution */}
+      <div className="mt-6 text-xs text-gray-400 text-center">
+        Team data: JABA PlayFlyFull_roster_teams.json (10 schools, 177+ teams) |
+        Brand data: Illustrative example for demonstration | Opportunity: (Followers × Engagement × $4/post × 52 weeks)
+      </div>
+    </div>
+  );
+}

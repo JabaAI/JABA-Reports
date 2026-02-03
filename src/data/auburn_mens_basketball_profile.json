@@ -1,0 +1,30 @@
+[{
+  "_id": {
+    "$oid": "69728f7a5eba931994de9bcd"
+  },
+  "source": "INSTAGRAM",
+  "accountId": "@auburnmbb",
+  "metrics": {
+    "comments": 60,
+    "likes": 6800,
+    "engagementRate": 0.030007523532911078,
+    "shares": 0,
+    "saves": 0,
+    "impressions": 0,
+    "followers": 228616,
+    "totalInteractions": 0,
+    "accountsEngaged": 0,
+    "videoViews": 0,
+    "reach": 0
+  },
+  "createdAt": {
+    "$date": "2026-01-22T20:58:34.619Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-02T23:35:19.353Z"
+  },
+  "syntheticProfile": true,
+  "organizationId": "68ae4b4073bfe6b9db3b4862",
+  "team": "MENS_BASKETBALL",
+  "type": "TEAM"
+}]
