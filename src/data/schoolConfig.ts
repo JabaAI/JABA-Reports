@@ -568,16 +568,55 @@ export const PLAYFLY: SchoolConfig = {
   logoUrl: '/playfly-logo.jpg'
 };
 
-// Partner schools for Playfly
+// Partner schools for Playfly - All 36 schools with name variations for matching
 export const PLAYFLY_PARTNER_SCHOOLS = [
-  'Virginia',
-  'Penn State University',
-  'Auburn University',
-  'Louisiana State University',
+  // SEC
+  'Auburn University', 'Auburn',
+  'Louisiana State University', 'LSU',
   'Texas A&M',
+  'The University of Alabama', 'Alabama',
+  'Tennessee',
+
+  // Big 12
   'Baylor',
-  'University of Texas at San Antonio (UTSA)',
+  'University of Central Florida', 'UCF',
+  'Houston',
+  'Rice University', 'Rice',
+  'The University of Arizona', 'Arizona',
+  'Arizona State University', 'Arizona State',
+
+  // Pac-12/Big Ten
+  'University of Southern California (USC)', 'USC',
+  'Oregon',
+  'Oregon State University', 'Oregon State',
   'Washington State',
+  'Nebraska',
+  'Michigan State', 'Michigan State University',
+  'Penn State University', 'Penn State',
+  'Maryland',
+
+  // ACC
+  'Virginia',
+
+  // Big East
+  'Villanova University', 'Villanova',
+  'Georgetown University', 'Georgetown',
+  'Butler University', 'Butler',
+  'Creighton University', 'Creighton',
+  'Depaul', 'DePaul',
+  'Marquette University', 'Marquette',
+  'Providence College', 'Providence',
+  'Seton Hall University', 'Seton Hall',
+  'St. John\'s University', 'St. John\'s',
+  'Xavier University', 'Xavier',
+
+  // Other
+  'Old Dominion University', 'Old Dominion',
+  'Wichita State University', 'Wichita State',
+  'Oral Roberts University (ORU)', 'Oral Roberts',
+  'University of New Mexico', 'New Mexico',
+  'New Mexico State University', 'New Mexico State',
+  'University of Texas at San Antonio (UTSA)', 'UTSA',
 ];
 
 // ============ ALL SCHOOLS LOOKUP MAP ============

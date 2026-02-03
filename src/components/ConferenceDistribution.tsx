@@ -8,7 +8,7 @@ export function ConferenceDistribution() {
     'Big Ten': 'from-indigo-500 to-indigo-700',
     'ACC': 'from-orange-500 to-orange-700',
     'Big 12': 'from-red-500 to-red-700',
-    'Pac-12': 'from-purple-500 to-purple-700',
+    'Pac-12': 'from-[#1770C0] to-purple-700',
   };
 
   // Geographic diversity data
@@ -142,7 +142,7 @@ export function ConferenceDistribution() {
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     sport.isHighest
-                      ? 'bg-gradient-to-r from-purple-500 to-purple-700'
+                      ? 'bg-gradient-to-r from-[#1770C0] to-purple-700'
                       : 'bg-gradient-to-r from-gray-400 to-gray-500'
                   }`}
                   style={{ width: `${(sport.percentage / maxSportPercentage) * 100}%` }}

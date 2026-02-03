@@ -131,7 +131,7 @@ export function PartnershipTimeline() {
         bg: 'bg-purple-50',
         border: 'border-purple-300',
         text: 'text-purple-900',
-        dot: 'bg-purple-600',
+        dot: 'bg-[#1770C0]',
       },
       green: {
         bg: 'bg-green-50',
@@ -149,7 +149,7 @@ export function PartnershipTimeline() {
         bg: 'bg-cyan-50',
         border: 'border-cyan-300',
         text: 'text-cyan-900',
-        dot: 'bg-cyan-600',
+        dot: 'bg-[#0D5A9F]',
       },
       red: {
         bg: 'bg-red-50',

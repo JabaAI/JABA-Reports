@@ -249,7 +249,7 @@ export function IPPremiumPlaybook() {
           {/* Step 2 */}
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border-2 border-purple-300">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xl">
+              <div className="w-12 h-12 rounded-full bg-[#1770C0] flex items-center justify-center flex-shrink-0 text-white font-bold text-xl">
                 2
               </div>
               <div className="flex-1">

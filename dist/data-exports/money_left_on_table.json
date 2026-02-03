@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-01-30T19:50:00.000Z",
+  "dataSource": "JABA PlayFlyFull_roster_teams.json",
+  "summary": {
+    "unsponsoredHighPerformers": 3,
+    "ninetyDayRevenueGap": 145000,
+    "annualizedGap": 580000,
+    "percentUnsponsored": 62.5,
+    "averageEMVPerAthlete": 4250
+  },
+  "unsponsoredAthletes": [
+    {
+      "schoolName": "Auburn University",
+      "sport": "WOMENS_VOLLEYBALL",
+      "engagementRate": 0.041,
+      "followers": 67500,
+      "ninetyDayEMV": 5790,
+      "potentialRevenue": 52110,
+      "recommendedPricePerPost": 635
+    },
+    {
+      "schoolName": "Louisiana State University",
+      "sport": "BASEBALL",
+      "engagementRate": 0.023,
+      "followers": 42000,
+      "ninetyDayEMV": 1115,
+      "potentialRevenue": 10035,
+      "recommendedPricePerPost": 145
+    },
+    {
+      "schoolName": "Baylor University",
+      "sport": "GYMNASTICS",
+      "engagementRate": 0.045,
+      "followers": 92000,
+      "ninetyDayEMV": 6970,
+      "potentialRevenue": 62730,
+      "recommendedPricePerPost": 662
+    }
+  ]
+}

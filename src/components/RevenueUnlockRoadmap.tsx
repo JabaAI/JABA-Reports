@@ -105,7 +105,7 @@ export function RevenueUnlockRoadmap() {
         border: 'border-purple-300',
         icon: 'text-purple-600',
         text: 'text-purple-900',
-        badge: 'bg-purple-600',
+        badge: 'bg-[#1770C0]',
       },
       green: {
         bg: 'from-green-50 to-green-100',

@@ -18,7 +18,7 @@ export function MarketOpportunity() {
         <h2 className="text-4xl font-bold text-black tracking-wide mb-2">
           THE PLAYFLY UNREALIZED POTENTIAL
         </h2>
-        <div className="h-1.5 w-32 bg-purple-600" />
+        <div className="h-1.5 w-32 bg-[#1770C0]" />
       </div>
 
       {/* 3-Column Layout */}
@@ -85,7 +85,7 @@ export function MarketOpportunity() {
               <div className="text-sm font-semibold text-gray-800 mb-2">Market Penetration</div>
               <div className="relative h-8 bg-purple-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-end pr-2 transition-all duration-1000"
+                  className="h-full bg-gradient-to-r from-[#1770C0] to-purple-600 flex items-center justify-end pr-2 transition-all duration-1000"
                   style={{ width: `${penetrationPercent}%` }}
                 >
                   <span className="text-white text-xs font-bold">{penetrationPercent.toFixed(0)}%</span>
@@ -138,7 +138,7 @@ export function MarketOpportunity() {
       {/* Conservative Estimate Box */}
       <div className="bg-gradient-to-br from-amber-100 to-yellow-100 border-4 border-amber-400 rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#1770C0] flex items-center justify-center">
             <DollarSign className="w-7 h-7 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-black">Conservative Growth Estimate</h3>
@@ -184,7 +184,7 @@ export function MarketOpportunity() {
           </div>
         </div>
 
-        <div className="mt-6 bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500">
+        <div className="mt-6 bg-amber-50 rounded-lg p-4 border-l-4 border-[#1770C0]">
           <div className="text-sm text-gray-800">
             <strong className="text-amber-900">Note:</strong> This assumes {targetMAXPercent}% MAX tier conversion at $
             {(revenuePerMAXSchool / 1000000).toFixed(1)}M average revenue per MAX school annually. Actual results may
@@ -194,7 +194,7 @@ export function MarketOpportunity() {
       </div>
 
       {/* Bottom Visual Impact */}
-      <div className="mt-8 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-xl p-8 text-white text-center">
+      <div className="mt-8 bg-gradient-to-r from-[#1770C0] via-indigo-600 to-blue-600 rounded-xl p-8 text-white text-center">
         <Globe className="w-16 h-16 mx-auto mb-4 opacity-80" />
         <div className="text-3xl font-bold mb-3">The Opportunity is NOW</div>
         <div className="text-purple-100 text-lg max-w-3xl mx-auto">

@@ -1,0 +1,521 @@
+import { useState, useMemo } from 'react';
+import { TrendingUp, Users, Target, AlertTriangle, ArrowRight, BarChart3, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { getAllSchools, getTeamsBySchool } from '../data/jabaRealData';
+
+/**
+ * BRAND CAMPAIGN OPPORTUNITY ANALYSIS
+ *
+ * Purpose: Illustrative example showing brand campaign expansion potential across ALL Playfly schools
+ * Compares athlete-only presence vs. team page reach opportunities
+ * NOTE: Uses hypothetical brand data for illustrative purposes
+ */
+
+type SortField = 'school' | 'athletePosts' | 'teamFollowers' | 'potential';
+type SortDirection = 'asc' | 'desc';
+
+interface SchoolBrandCampaignData {
+  schoolName: string;
+  conference: string;
+  athletePosts: number;
+  teamPagePosts: number;
+  teamFollowers: number;
+  avgEngagement: number;
+  teamPotential: number;
+}
+
+export function RealTimeCampaignOptimization() {
+  const [sortField, setSortField] = useState<SortField>('potential');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [showAll, setShowAll] = useState(false);
+
+  // Generate Nike data for all schools
+  const schoolBrandData: SchoolBrandCampaignData[] = useMemo(() => {
+    const schools = getAllSchools();
+
+    // ILLUSTRATIVE EXAMPLE: Hypothetical brand athlete post counts per school
+    // In production, this would come from actual brand campaign data
+    const brandAthletePostsMap: Record<string, number> = {
+      'Auburn University': 12,
+      'Alabama': 8,
+      'Louisiana State University': 6,
+      'Texas A&M': 5,
+      'Penn State University': 4,
+      'Oregon': 9,
+      'Oregon State University': 7,
+      'The University of Arizona': 6,
+      'University of Southern California (USC)': 11,
+      'Michigan State': 5,
+      'Tennessee': 7,
+      'Nebraska': 4,
+      'Maryland': 3,
+      // Add more schools with varying athlete post counts
+    };
+
+    return schools.map(schoolName => {
+      const schoolTeams = getTeamsBySchool(schoolName);
+
+      const teamFollowers = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.followers, 0);
+      const avgEngagement = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.engagementRate, 0) / schoolTeams.length;
+      const teamPagePosts = schoolTeams.reduce((sum, t) => sum + t.metrics.ninetyDays.sponsoredContentCount, 0);
+
+      // Get athlete posts (illustrative data, or 0 if not in hypothetical brand network)
+      const athletePosts = brandAthletePostsMap[schoolName] || 0;
+
+      // Calculate team potential: engaged users × $5 per post × 52 weeks
+      const engagedUsers = teamFollowers * avgEngagement;
+      const teamPotential = engagedUsers * 5 * 52;
+
+      const conference = schoolTeams[0]?.conferenceName || 'Unknown';
+
+      return {
+        schoolName,
+        conference,
+        athletePosts,
+        teamPagePosts,
+        teamFollowers,
+        avgEngagement,
+        teamPotential,
+      };
+    });
+  }, []);
+
+  // Sort schools
+  const sortedSchools = useMemo(() => {
+    const sorted = [...schoolBrandData];
+    sorted.sort((a, b) => {
+      let aVal: number | string = 0;
+      let bVal: number | string = 0;
+
+      if (sortField === 'school') {
+        aVal = a.schoolName;
+        bVal = b.schoolName;
+      } else if (sortField === 'athletePosts') {
+        aVal = a.athletePosts;
+        bVal = b.athletePosts;
+      } else if (sortField === 'teamFollowers') {
+        aVal = a.teamFollowers;
+        bVal = b.teamFollowers;
+      } else if (sortField === 'potential') {
+        aVal = a.teamPotential;
+        bVal = b.teamPotential;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+
+      return sortDirection === 'asc' ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
+    });
+
+    return sorted;
+  }, [schoolBrandData, sortField, sortDirection]);
+
+  const displayedSchools = showAll ? sortedSchools : sortedSchools.slice(0, 10);
+
+  // Network-level calculations
+  const totalAthletePosts = schoolBrandData.reduce((sum, s) => sum + s.athletePosts, 0);
+  const totalTeamPagePosts = schoolBrandData.reduce((sum, s) => sum + s.teamPagePosts, 0);
+  const totalTeamFollowers = schoolBrandData.reduce((sum, s) => sum + s.teamFollowers, 0);
+  const schoolsWithAthletePosts = schoolBrandData.filter(s => s.athletePosts > 0).length;
+  const totalSchools = schoolBrandData.length;
+  const totalTeamPotential = schoolBrandData.reduce((sum, s) => sum + s.teamPotential, 0);
+
+  // Nike athlete channel EMV (rough estimate: $2K per post)
+  const athleteChannelEMV = totalAthletePosts * 2000;
+
+  // Average reach per athlete post (estimate)
+  const avgAthleteReachPerPost = 42000;
+
+  // Average reach per team page (total followers / schools with teams)
+  const avgTeamPageReach = totalTeamFollowers / totalSchools;
+
+  // Top 5 schools by opportunity with zero team page posts
+  const top5BrandGaps = sortedSchools
+    .filter(s => s.teamPagePosts === 0)
+    .sort((a, b) => b.teamPotential - a.teamPotential)
+    .slice(0, 5);
+
+  const top5TotalPotential = top5BrandGaps.reduce((sum, s) => sum + s.teamPotential, 0);
+  const top5TotalFollowers = top5BrandGaps.reduce((sum, s) => sum + s.teamFollowers, 0);
+
+  // Schools with most athlete posts
+  const topAthletePostSchools = [...schoolBrandData]
+    .filter(s => s.athletePosts > 0)
+    .sort((a, b) => b.athletePosts - a.athletePosts)
+    .slice(0, 5);
+
+  const formatCurrency = (value: number): string => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value.toFixed(0)}`;
+  };
+
+  const formatNumber = (value: number): string => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+    return value.toLocaleString();
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'school' ? 'asc' : 'desc');
+    }
+  };
+
+  return (
+    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-sm">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#1770C0] to-[#1770C0] flex items-center justify-center">
+            <TrendingUp className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-white tracking-wide">
+              BRAND CAMPAIGN OPPORTUNITY
+            </h2>
+            <p className="text-[#1770C0] font-semibold text-sm">Illustrative Example - Playfly Network (All {totalSchools} Schools)</p>
+            <p className="text-xs text-gray-400 mt-1">* Hypothetical brand data for demonstration purposes</p>
+          </div>
+        </div>
+        <div className="h-1.5 w-32 bg-gradient-to-r from-[#1770C0] to-[#1770C0]" />
+      </div>
+
+      {/* SECTION 1: Brand Campaign ROI Comparison (Network Level) */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Target className="w-6 h-6 text-[#1770C0]" />
+          Brand Campaign ROI Comparison (Network Level)
+        </h3>
+        <div className="bg-white rounded-xl border-2 border-[#1770C0] overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-[#1770C0] to-[#0D5A9F] text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-bold">Metric</th>
+                <th className="px-4 py-3 text-center text-sm font-bold">Athlete Channel</th>
+                <th className="px-4 py-3 text-center text-sm font-bold">Team Page Channel</th>
+                <th className="px-4 py-3 text-center text-sm font-bold">Gap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <td className="px-4 py-3 font-semibold text-white">Current Posts</td>
+                <td className="px-4 py-3 text-center">
+                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">{totalAthletePosts}</span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-bold">{totalTeamPagePosts}</span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className="text-red-600 font-bold">{totalAthletePosts} missing</span>
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200 bg-white">
+                <td className="px-4 py-3 font-semibold text-white">Schools Participating</td>
+                <td className="px-4 py-3 text-center font-bold text-white">{schoolsWithAthletePosts}</td>
+                <td className="px-4 py-3 text-center font-bold text-red-600">0</td>
+                <td className="px-4 py-3 text-center">
+                  <span className="text-[#1770C0] font-bold">{totalSchools - schoolsWithAthletePosts} schools untapped</span>
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <td className="px-4 py-3 font-semibold text-white">Reach Per Post (avg)</td>
+                <td className="px-4 py-3 text-center font-bold text-white">~{formatNumber(avgAthleteReachPerPost)}</td>
+                <td className="px-4 py-3 text-center font-bold text-[#1770C0]">~{formatNumber(avgTeamPageReach)} potential</td>
+                <td className="px-4 py-3 text-center">
+                  <span className="text-[#1770C0] font-bold">{(avgTeamPageReach / avgAthleteReachPerPost).toFixed(0)}X underutilized</span>
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200 bg-white">
+                <td className="px-4 py-3 font-semibold text-white">Annual EMV (current)</td>
+                <td className="px-4 py-3 text-center font-bold text-green-600">{formatCurrency(athleteChannelEMV)}</td>
+                <td className="px-4 py-3 text-center font-bold text-gray-400">$0</td>
+                <td className="px-4 py-3 text-center">
+                  <span className="text-[#1770C0] font-bold">{formatCurrency(totalTeamPotential / 10)}+ opportunity</span>
+                </td>
+              </tr>
+              <tr className="bg-[#1770C0]/20">
+                <td className="px-4 py-4 font-bold text-white">Efficiency</td>
+                <td className="px-4 py-4 text-center">
+                  <span className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold">ACTIVATED</span>
+                </td>
+                <td className="px-4 py-4 text-center">
+                  <span className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold">DORMANT</span>
+                </td>
+                <td className="px-4 py-4 text-center">
+                  <button className="bg-[#1770C0] text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-[#1770C0] transition-all">
+                    ACTIVATE
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* SECTION 2: School-by-School Brand Gap Analysis */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-[#1770C0]" />
+            School-by-School Brand Gap Analysis
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <ArrowUpDown className="w-4 h-4" />
+            <span>Click column headers to sort</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border-2 border-[#1770C0] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-[#1770C0] to-[#0D5A9F] text-white">
+                <tr>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('school')}
+                  >
+                    <div className="flex items-center gap-2">
+                      SCHOOL
+                      {sortField === 'school' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-right text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('athletePosts')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      ATHLETE POSTS (BRAND)
+                      {sortField === 'athletePosts' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold">TEAM PAGE POSTS</th>
+                  <th
+                    className="px-4 py-3 text-right text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('teamFollowers')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      TEAM FOLLOWERS
+                      {sortField === 'teamFollowers' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-right text-xs font-bold cursor-pointer hover:bg-white/10 transition-colors"
+                    onClick={() => handleSort('potential')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      TEAM POTENTIAL
+                      {sortField === 'potential' && (
+                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayedSchools.map((school, idx) => (
+                  <tr
+                    key={school.schoolName}
+                    className={`border-b border-gray-200 ${idx % 2 === 0 ? 'bg-[#1770C0]/10' : 'bg-white'} hover:bg-[#1770C0]/100 transition-colors`}
+                  >
+                    <td className="px-4 py-3 font-semibold text-white">{school.schoolName}</td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`px-2 py-1 rounded-full text-sm font-bold ${
+                        school.athletePosts > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'
+                      }`}>
+                        {school.athletePosts}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-bold">
+                        {school.teamPagePosts}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-[#1770C0]">{formatNumber(school.teamFollowers)}</td>
+                    <td className="px-4 py-3 text-right font-bold text-[#1770C0]">{formatCurrency(school.teamPotential)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {!showAll && sortedSchools.length > 10 && (
+            <div className="bg-[#1770C0]/10 p-4 text-center border-t-2 border-[#1770C0]">
+              <button
+                onClick={() => setShowAll(true)}
+                className="text-[#1770C0] font-bold hover:text-[#1770C0] transition-colors flex items-center gap-2 mx-auto"
+              >
+                <span>Show All {sortedSchools.length} Schools</span>
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {showAll && (
+            <div className="bg-[#1770C0]/10 p-4 text-center border-t-2 border-[#1770C0]">
+              <button
+                onClick={() => setShowAll(false)}
+                className="text-[#1770C0] font-bold hover:text-[#1770C0] transition-colors flex items-center gap-2 mx-auto"
+              >
+                <span>Show Top 10 Only</span>
+                <ChevronUp className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 3: "What Brands Are Missing Across Playfly" */}
+      <div className="mb-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl p-8 text-white shadow-xl border-2 border-orange-700">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-7 h-7 animate-pulse" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold mb-2">What Brands Are Missing Across Playfly</h3>
+            <p className="text-lg opacity-95">
+              Illustrative Example: <span className="font-bold">{totalAthletePosts} athlete posts</span> across Playfly ({formatCurrency(athleteChannelEMV)} EMV) but{' '}
+              <span className="font-bold">ZERO team posts across {totalSchools} schools</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h4 className="text-xl font-bold mb-4">Top 5 Brand Gaps:</h4>
+          <div className="space-y-3">
+            {top5BrandGaps.map((school, idx) => (
+              <div key={school.schoolName} className="bg-white/10 rounded-lg p-4 backdrop-blur">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-700 text-white flex items-center justify-center font-bold text-sm">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <div className="font-bold text-lg">{school.schoolName}</div>
+                      <div className="text-sm opacity-90">
+                        {school.athletePosts} athlete posts, {formatNumber(school.teamFollowers)} team followers
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{formatCurrency(school.teamPotential)}</div>
+                    <div className="text-xs opacity-75">untapped</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-orange-900/50 rounded-lg p-6 border-2 border-orange-400">
+          <div className="grid grid-cols-2 gap-6 mb-4">
+            <div>
+              <div className="text-sm opacity-90 mb-1">Top 5 Schools Combined Followers</div>
+              <div className="text-4xl font-bold">{formatNumber(top5TotalFollowers)}</div>
+            </div>
+            <div>
+              <div className="text-sm opacity-90 mb-1">Top 5 Schools Opportunity</div>
+              <div className="text-4xl font-bold">{formatCurrency(top5TotalPotential)}</div>
+            </div>
+          </div>
+          <p className="text-lg font-bold">
+            Playfly could generate <span className="text-white">{formatCurrency(top5TotalPotential / 5)}+</span> in NEW brand revenue by activating team pages across these 5 schools with the same budget
+          </p>
+        </div>
+      </div>
+
+      {/* SECTION 4: Campaign Efficiency Dashboard */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Users className="w-6 h-6 text-[#1770C0]" />
+          Campaign Efficiency Dashboard
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Chart 1: Athlete Posts by School */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-400">
+            <h4 className="text-lg font-bold text-white mb-4">Top Brand Athlete Post Schools</h4>
+            <div className="space-y-3">
+              {topAthletePostSchools.map((school) => (
+                <div key={school.schoolName} className="bg-white rounded-lg p-3 border border-green-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-semibold text-white">{school.schoolName}</div>
+                    <div className="text-lg font-bold text-green-600">{school.athletePosts} posts</div>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-600"
+                      style={{ width: `${(school.athletePosts / topAthletePostSchools[0].athletePosts) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Chart 2: Team Page Followers (Unused Reach) */}
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-400">
+            <h4 className="text-lg font-bold text-white mb-4">Highest Team Page Reach (Unused)</h4>
+            <div className="space-y-3">
+              {[...schoolBrandData].sort((a, b) => b.teamFollowers - a.teamFollowers).slice(0, 5).map((school) => (
+                <div key={school.schoolName} className="bg-white rounded-lg p-3 border border-orange-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-semibold text-white">{school.schoolName}</div>
+                    <div className="text-lg font-bold text-orange-600">{formatNumber(school.teamFollowers)}</div>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-500 to-red-600"
+                      style={{ width: `${(school.teamFollowers / totalTeamFollowers) * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {school.teamPagePosts === 0 && <span className="text-red-600 font-semibold">⚠️ Zero branded posts</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 bg-[#1770C0]/20 rounded-lg p-6 border-2 border-[#1770C0]">
+          <div className="flex items-start gap-3">
+            <Target className="w-6 h-6 text-[#1770C0] flex-shrink-0 mt-1" />
+            <div>
+              <div className="font-bold text-lg text-white mb-2">Key Insight</div>
+              <p className="text-gray-300">
+                The schools with <span className="font-bold text-[#1770C0]">MOST brand athlete posts</span> have the{' '}
+                <span className="font-bold text-[#1770C0]">MOST team followers</span>—maximum leverage opportunity.
+                Activating team pages at these schools delivers instant ROI with existing brand relationships.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Button */}
+      <div className="text-center">
+        <button className="bg-gradient-to-r from-[#1770C0] to-[#1770C0] text-white px-8 py-4 rounded-xl text-lg font-bold hover:from-[#1770C0] hover:to-blue-700 transition-all shadow-lg flex items-center gap-3 mx-auto">
+          <span>Activate Team Page Brand Campaigns</span>
+          <ArrowRight className="w-5 h-5" />
+        </button>
+        <p className="text-xs text-gray-400 mt-3">View Brand Partnership Opportunities to activate team page campaigns</p>
+      </div>
+
+      {/* Data Attribution */}
+      <div className="mt-6 text-xs text-gray-400 text-center">
+        Team data: JABA PlayFlyFull_roster_teams.json ({totalSchools} schools, 177 teams) |
+        Brand campaign data: Illustrative example for demonstration | Team potential: (Followers × Engagement × $5/post × 52 weeks)
+      </div>
+    </div>
+  );
+}
