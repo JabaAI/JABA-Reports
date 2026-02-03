@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+
+# Build output (we rebuild in container)
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test files
+coverage
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Documentation
+*.md
+README*
+
+# Large data files (if any)
+*.json.bak
+
+# Deployment configs (not needed in image)
+.vercelignore
+vercel.json
+cloudbuild.yaml
