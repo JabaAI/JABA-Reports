@@ -3,6 +3,8 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '--build-arg'
+      - 'VITE_AVAILABLE_REPORTS=${_VITE_AVAILABLE_REPORTS}'
       - '-t'
       - 'gcr.io/$PROJECT_ID/jaba-reports:$COMMIT_SHA'
       - '-t'
@@ -53,6 +55,7 @@ images:
 # Substitution variables (can be overridden)
 substitutions:
   _REGION: 'us-central1'
+  _VITE_AVAILABLE_REPORTS: ''
 
 # Build options
 options:

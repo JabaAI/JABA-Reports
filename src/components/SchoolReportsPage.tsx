@@ -4,12 +4,15 @@ import { SCHOOLS, SchoolConfig } from '../data/schoolConfig';
 import { SchoolReportView } from './SchoolReportView';
 import { PlayflyReportHub } from './PlayflyReportHub';
 import { AuburnCampaignReport } from './AuburnCampaignReport';
+import { isSchoolEnabled } from '../config/reports';
 
 export function SchoolReportsPage() {
   const [selectedSchool, setSelectedSchool] = useState<SchoolConfig | null>(null);
 
-  // Show Playfly, Auburn, and Kentucky
-  const allSchools = [SCHOOLS['playfly'], SCHOOLS['auburn'], SCHOOLS['kentucky']].filter(Boolean);
+  // Show Playfly, Auburn, and Kentucky (filtered by VITE_AVAILABLE_REPORTS)
+  const allSchools = [SCHOOLS['playfly'], SCHOOLS['auburn'], SCHOOLS['kentucky']]
+    .filter(Boolean)
+    .filter((school) => isSchoolEnabled(school.id));
 
   // If a school is selected, show the appropriate view
   if (selectedSchool) {

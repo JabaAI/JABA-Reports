@@ -2,10 +2,11 @@
  * Reports Configuration
  *
  * Controls which reports are available based on environment variables.
- * Set VITE_AVAILABLE_REPORTS to a comma-separated list of report IDs.
+ * Set VITE_AVAILABLE_REPORTS to a comma-separated list of report/school IDs.
  */
 
 export type ReportId = 'playfly-dashboard' | 'ip-report' | 'brand-partnerships';
+export type SchoolId = 'playfly' | 'auburn' | 'kentucky';
 
 export interface ReportConfig {
   id: ReportId;
@@ -15,12 +16,12 @@ export interface ReportConfig {
 }
 
 /**
- * Get the list of enabled report IDs from environment variables
+ * Get the list of enabled IDs from environment variables
  */
-function getEnabledReportIds(): ReportId[] | null {
+function getEnabledIds(): string[] | null {
   const envReports = import.meta.env.VITE_AVAILABLE_REPORTS;
 
-  // If not set or empty, return null (show all reports)
+  // If not set or empty, return null (show all)
   if (!envReports || envReports.trim() === '') {
     return null;
   }
@@ -29,7 +30,14 @@ function getEnabledReportIds(): ReportId[] | null {
   return envReports
     .split(',')
     .map((r: string) => r.trim())
-    .filter((r: string) => r.length > 0) as ReportId[];
+    .filter((r: string) => r.length > 0);
+}
+
+/**
+ * Get the list of enabled report IDs from environment variables
+ */
+function getEnabledReportIds(): ReportId[] | null {
+  return getEnabledIds() as ReportId[] | null;
 }
 
 /**
@@ -45,6 +53,21 @@ export function isReportEnabled(reportId: ReportId): boolean {
 
   // Check if this specific report is in the enabled list
   return enabledReports.includes(reportId);
+}
+
+/**
+ * Check if a specific school is enabled
+ */
+export function isSchoolEnabled(schoolId: string): boolean {
+  const enabledIds = getEnabledIds();
+
+  // If null (not configured), all schools are enabled
+  if (enabledIds === null) {
+    return true;
+  }
+
+  // Check if this specific school is in the enabled list
+  return enabledIds.includes(schoolId);
 }
 
 /**

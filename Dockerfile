@@ -3,6 +3,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Build-time environment variables
+ARG VITE_AVAILABLE_REPORTS
+ENV VITE_AVAILABLE_REPORTS=$VITE_AVAILABLE_REPORTS
+
 # Copy package files
 COPY package.json package-lock.json ./
 
