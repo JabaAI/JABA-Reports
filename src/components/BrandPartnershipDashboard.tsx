@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Users, Building2, TrendingUp, AlertCircle, DollarSign, Eye } from 'lucide-react';
+import { Users, Building2, TrendingUp, AlertCircle, DollarSign, Eye, Download } from 'lucide-react';
+import { ExportModal } from './ExportModal';
+import { exportToPDF, exportToCSV, exportToExcel, ExportData } from '../utils/exportUtils';
 
 interface BrandStats {
   brandName: string;
@@ -23,6 +25,7 @@ export default function BrandPartnershipDashboard() {
   const [brandStats, setBrandStats] = useState<BrandStats[]>([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [activeTab, setActiveTab] = useState<'athlete' | 'teampage'>('athlete');
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Mock team page sponsorship data (in real implementation, this would come from backend)
   const teamPagePlacements: TeamPagePlacement[] = [
@@ -70,6 +73,57 @@ export default function BrandPartnershipDashboard() {
     loadSponsoredPosts();
   }, []);
 
+  const handleExport = async (format: 'pdf' | 'csv' | 'excel') => {
+    const exportData: ExportData = {
+      reportName: 'Brand Partnership Network',
+      schoolName: 'Playfly Network',
+      dateGenerated: new Date().toLocaleString(),
+      metrics: [
+        { label: 'Total Posts', value: totalPosts.toLocaleString() },
+        { label: 'Active Brands', value: activeBrands },
+        { label: 'Athletes with Sponsors', value: athletesWithSponsors.toLocaleString() },
+        { label: 'Avg Engagement Per Post', value: `${avgEngagementPerPost.toFixed(1)}%` },
+        { label: 'Schools with Team Page Sponsors', value: schoolsWithTeamPageSponsors },
+        { label: 'Total Team Page Revenue', value: `$${(totalTeamPageValue / 1000).toFixed(0)}K/month` },
+      ],
+      tables: [
+        {
+          title: 'Brand Performance - Athlete Channel',
+          headers: ['Brand', 'Posts', 'Schools Active', 'Avg Engagement Rate'],
+          rows: brandStats.map(brand => [
+            brand.brandName,
+            brand.postCount,
+            brand.schoolCount,
+            `${brand.avgEngagementRate.toFixed(1)}%`,
+          ]),
+        },
+        {
+          title: 'Team Page Sponsorships',
+          headers: ['School', 'Brand Logos', 'Monthly Impressions', 'Estimated Value'],
+          rows: teamPagePlacements.map(placement => [
+            placement.schoolName,
+            placement.brandLogos.join(', '),
+            placement.monthlyImpressions.toLocaleString(),
+            `$${(placement.estimatedValue / 1000).toFixed(0)}K`,
+          ]),
+        },
+      ],
+    };
+
+    try {
+      if (format === 'pdf') {
+        await exportToPDF(exportData);
+      } else if (format === 'csv') {
+        await exportToCSV(exportData);
+      } else if (format === 'excel') {
+        await exportToExcel(exportData);
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      throw error;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
@@ -86,13 +140,22 @@ export default function BrandPartnershipDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-8 pt-20">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Playfly Brand Partnership Network
-          </h1>
-          <p className="text-gray-300 text-lg">
-            Two distinct revenue streams powering your NIL monetization
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Playfly Brand Partnership Network
+            </h1>
+            <p className="text-gray-300 text-lg">
+              Your Campaign Performance Across Our Network
+            </p>
+          </div>
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="bg-[#FFFF00] hover:bg-[#FFFF00]/90 text-[#091831] px-6 py-3 rounded-lg font-semibold text-sm flex items-center gap-2 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export Report
+          </button>
         </div>
 
         {/* Revenue Stream Tabs */}
@@ -259,33 +322,11 @@ export default function BrandPartnershipDashboard() {
 
               <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-5 h-5 text-red-400" />
-                  <div className="text-gray-300 text-sm">Zero Sponsors</div>
+                  <TrendingUp className="w-5 h-5 text-[#3B9FD9]" />
+                  <div className="text-gray-300 text-sm">Growth Opportunities</div>
                 </div>
                 <div className="text-4xl font-bold text-white">{schoolsWithZeroSponsors}</div>
-                <div className="text-xs text-red-400 mt-1">Schools unmmonetized</div>
-              </div>
-            </div>
-
-            {/* Critical Gap Alert */}
-            <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-lg rounded-xl p-6 border border-red-500/50">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-red-500 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">CRITICAL GAP: Team Pages Undermonetized</h3>
-                  <p className="text-gray-200 mb-3">
-                    Only <span className="font-bold text-red-400">{schoolsWithTeamPageSponsors}/20 schools</span> have team page brand placements.
-                    That's <span className="font-bold text-red-400">{schoolsWithZeroSponsors} schools with ZERO team page revenue</span>.
-                  </p>
-                  <div className="bg-black/30 rounded-lg p-4">
-                    <div className="text-sm text-gray-300 mb-1">Untapped Monthly Opportunity:</div>
-                    <div className="text-3xl font-bold text-red-400">
-                      ${(untappedTeamPageValue / 1000).toFixed(0)}K/month = ${((untappedTeamPageValue * 12) / 1000000).toFixed(1)}M/year
-                    </div>
-                  </div>
-                </div>
+                <div className="text-xs text-[#3B9FD9] mt-1">Schools ready to activate</div>
               </div>
             </div>
 
@@ -326,30 +367,9 @@ export default function BrandPartnershipDashboard() {
               </div>
             </div>
 
-            {/* Schools Without Team Page Sponsors */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-red-500/30">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                <span className="text-red-400">{schoolsWithZeroSponsors} Schools</span> with Zero Team Page Sponsorships
-              </h2>
-              <p className="text-gray-300 mb-4">
-                These schools have NO brand placements on their official team pages. Each represents ~$20K/month in untapped revenue.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {['Michigan State', 'Oregon', 'Arizona', 'Arizona State', 'Baylor', 'Houston', 'UCF', 'Maryland', 'Virginia', 'Villanova',
-                  'Georgetown', 'Marquette', 'Creighton', 'Xavier', 'Butler', 'Seton Hall', 'Providence', "St. John's",
-                  'DePaul', 'Butler', 'Providence', 'Seton Hall', 'St. John\'s', 'Connecticut', 'Washington State', 'UTSA', 'Virginia Tech', 'Wake Forest'
-                ].slice(0, schoolsWithZeroSponsors).map((school) => (
-                  <div key={school} className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
-                    <div className="text-white font-medium text-sm">{school}</div>
-                    <div className="text-xs text-red-400 mt-1">$0 team page revenue</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Comparison Insight */}
             <div className="bg-gradient-to-r from-[#1770C0]/20 to-blue-500/20 backdrop-blur-lg rounded-xl p-6 border border-purple-500/50">
-              <h3 className="text-xl font-bold text-white mb-4">Revenue Stream Comparison</h3>
+              <h3 className="text-xl font-bold text-white mb-4">Channel Performance</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="text-[#3B9FD9] font-semibold mb-2">✓ Athlete-Generated (Strong)</div>
@@ -361,11 +381,11 @@ export default function BrandPartnershipDashboard() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-red-400 font-semibold mb-2">⚠ Team Page Sponsorships (Gap)</div>
+                  <div className="text-[#3B9FD9] font-semibold mb-2">✓ Team Page Sponsorships (Growing)</div>
                   <div className="text-gray-200 text-sm">
-                    • Only {schoolsWithTeamPageSponsors}/20 schools monetized<br />
-                    • {schoolsWithZeroSponsors} schools generating $0 from team pages<br />
-                    • ${((untappedTeamPageValue * 12) / 1000000).toFixed(1)}M annual opportunity missed<br />
+                    • {schoolsWithTeamPageSponsors} schools actively monetized<br />
+                    • ${(totalTeamPageValue / 1000).toFixed(0)}K monthly revenue generated<br />
+                    • {schoolsWithZeroSponsors} additional schools ready to activate<br />
                     • Revenue driver: Guaranteed placement fees, CPM rates
                   </div>
                 </div>
@@ -374,6 +394,14 @@ export default function BrandPartnershipDashboard() {
           </div>
         )}
       </div>
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExport}
+        reportName="Playfly Brand Partnership Network"
+      />
     </div>
   );
 }
