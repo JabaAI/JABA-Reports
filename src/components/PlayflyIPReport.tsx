@@ -250,7 +250,7 @@ export function PlayflyIPReport({ onBack }: PlayflyIPReportProps) {
             <div className="h-1 w-40 bg-gradient-to-r from-[#3B9FD9] to-blue-500 mb-8" />
 
             {/* CTA / Value prop */}
-            <div className="bg-white/10 backdrop-blur-sm border-2 border-[#1770C0]/50 rounded-xl p-6 max-w-4xl">
+            <div className="bg-white/10 backdrop-blur-sm border-2 border-[#1770C0]/50 rounded-xl p-6">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-[#1770C0] to-blue-500 flex items-center justify-center flex-shrink-0">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
