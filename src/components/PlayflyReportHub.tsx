@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Briefcase, ArrowLeft, Award } from 'lucide-react';
+import { ArrowLeft, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
-import BrandPartnershipDashboard from './BrandPartnershipDashboard';
 import { PlayflyIPReport } from './PlayflyIPReport';
+import { isReportEnabled } from '../config/reports';
 
-type View = 'hub' | 'brand-partnerships' | 'ip-report';
+type View = 'hub' | 'ip-report';
 
 interface PlayflyReportHubProps {
   onBack: () => void;
@@ -12,22 +12,6 @@ interface PlayflyReportHubProps {
 
 export function PlayflyReportHub({ onBack }: PlayflyReportHubProps) {
   const [activeView, setActiveView] = useState<View>('hub');
-
-  // Brand Partnerships view
-  if (activeView === 'brand-partnerships') {
-    return (
-      <div>
-        <button
-          onClick={() => setActiveView('hub')}
-          className="fixed top-6 left-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all border border-white/20 flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Playfly Reports
-        </button>
-        <BrandPartnershipDashboard />
-      </div>
-    );
-  }
 
   // IP Report view
   if (activeView === 'ip-report') {
@@ -78,109 +62,80 @@ export function PlayflyReportHub({ onBack }: PlayflyReportHubProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
           {/* Card 1: Dashboard */}
-          <motion.button
-            onClick={() => window.open('https://jaba-app-1007845235832.us-central1.run.app/playfly', '_blank')}
-            className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#3B9FD9]/50 transition-all duration-300 text-left w-full overflow-hidden lg:col-span-2"
-            whileHover={{ scale: 1.02, y: -5 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {/* Header Background Image */}
-            <div
-              className="absolute inset-0 bg-cover bg-center opacity-10"
-              style={{ backgroundImage: "url('/header BG- V4-WithoutBalls_less.jpg')" }}
-            />
+          {isReportEnabled('playfly-dashboard') && (
+            <motion.button
+              onClick={() => window.open('https://jaba-app-1007845235832.us-central1.run.app/playfly', '_blank')}
+              className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#3B9FD9]/50 transition-all duration-300 text-left w-full overflow-hidden lg:col-span-2"
+              whileHover={{ scale: 1.02, y: -5 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Header Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-10"
+                style={{ backgroundImage: "url('/header BG- V4-WithoutBalls_less.jpg')" }}
+              />
 
-            <div className="relative z-10">
-              {/* Icon */}
-              <div className="w-40 h-40 flex items-center justify-center -mt-12 mb-4">
-                <img src="/jaba-logo.png" alt="JABA" className="w-full h-full object-contain" />
+              <div className="relative z-10">
+                {/* Icon */}
+                <div className="w-40 h-40 flex items-center justify-center -mt-12 mb-4">
+                  <img src="/jaba-logo.png" alt="JABA" className="w-full h-full object-contain" />
+                </div>
+
+                {/* Title */}
+                <h2 className="text-2xl font-bold text-white mb-3 -mt-16">
+                  Playfly Dashboard
+                </h2>
+
+                {/* One-line description */}
+                <p className="text-gray-300 text-base mb-6">
+                  Real-time campaign management and athlete oversight
+                </p>
+
+                {/* View button */}
+                <div className="flex items-center gap-2 text-[#3B9FD9] text-sm font-semibold">
+                  <span>View Dashboard</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
-
-              {/* Title */}
-              <h2 className="text-2xl font-bold text-white mb-3 -mt-16">
-                Playfly Dashboard
-              </h2>
-
-              {/* One-line description */}
-              <p className="text-gray-300 text-base mb-6">
-                Real-time campaign management and athlete oversight
-              </p>
-
-              {/* View button */}
-              <div className="flex items-center gap-2 text-[#3B9FD9] text-sm font-semibold">
-                <span>View Dashboard</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </motion.button>
+            </motion.button>
+          )}
 
           {/* Card 2: IP Impact Report */}
-          <motion.button
-            onClick={() => setActiveView('ip-report')}
-            className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-yellow-400/50 transition-all duration-300 text-left w-full"
-            whileHover={{ scale: 1.02, y: -5 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="relative z-10">
-              {/* Icon */}
-              <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-[#1770C0] rounded-xl flex items-center justify-center mb-4">
-                <Award className="w-7 h-7 text-white" />
+          {isReportEnabled('ip-report') && (
+            <motion.button
+              onClick={() => setActiveView('ip-report')}
+              className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-yellow-400/50 transition-all duration-300 text-left w-full lg:col-span-2"
+              whileHover={{ scale: 1.02, y: -5 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="relative z-10">
+                {/* Icon */}
+                <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-[#1770C0] rounded-xl flex items-center justify-center mb-4">
+                  <Award className="w-7 h-7 text-white" />
+                </div>
+
+                {/* Title */}
+                <h2 className="text-2xl font-bold text-white mb-3">
+                  IP Impact Report
+                </h2>
+
+                {/* One-line description */}
+                <p className="text-gray-300 text-base mb-6">
+                  How intellectual property signals drive engagement
+                </p>
+
+                {/* View button */}
+                <div className="flex items-center gap-2 text-yellow-400 text-sm font-semibold">
+                  <span>View Report</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
-
-              {/* Title */}
-              <h2 className="text-2xl font-bold text-white mb-3">
-                IP Impact Report
-              </h2>
-
-              {/* One-line description */}
-              <p className="text-gray-300 text-base mb-6">
-                How intellectual property signals drive engagement
-              </p>
-
-              {/* View button */}
-              <div className="flex items-center gap-2 text-yellow-400 text-sm font-semibold">
-                <span>View Report</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Card 3: Brand Partnerships */}
-          <motion.button
-            onClick={() => setActiveView('brand-partnerships')}
-            className="group relative bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-purple-400/50 transition-all duration-300 text-left w-full"
-            whileHover={{ scale: 1.02, y: -5 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="relative z-10">
-              {/* Icon */}
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-[#1770C0] rounded-xl flex items-center justify-center mb-4">
-                <Briefcase className="w-7 h-7 text-white" />
-              </div>
-
-              {/* Title */}
-              <h2 className="text-2xl font-bold text-white mb-3">
-                Brand Partnerships
-              </h2>
-
-              {/* One-line description */}
-              <p className="text-gray-300 text-base mb-6">
-                Analyze brand performance and partnership gaps
-              </p>
-
-              {/* View button */}
-              <div className="flex items-center gap-2 text-purple-400 text-sm font-semibold">
-                <span>View Analysis</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </motion.button>
+            </motion.button>
+          )}
 
         </div>
 
