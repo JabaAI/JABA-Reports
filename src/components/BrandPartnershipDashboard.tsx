@@ -16,8 +16,6 @@ interface BrandStats {
 interface TeamPagePlacement {
   schoolName: string;
   brandLogos: string[];
-  monthlyImpressions: number;
-  estimatedValue: number;
 }
 
 export default function BrandPartnershipDashboard() {
@@ -27,21 +25,20 @@ export default function BrandPartnershipDashboard() {
   const [activeTab, setActiveTab] = useState<'athlete' | 'teampage'>('athlete');
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Mock team page sponsorship data (in real implementation, this would come from backend)
+  // Team page sponsorship data - actual brand placements
   const teamPagePlacements: TeamPagePlacement[] = [
-    { schoolName: 'Nebraska', brandLogos: ['Nike', 'Adidas', 'Gatorade'], monthlyImpressions: 500000, estimatedValue: 25000 },
-    { schoolName: 'Alabama', brandLogos: ['Nike', "Raising Cane's", 'H-E-B'], monthlyImpressions: 750000, estimatedValue: 40000 },
-    { schoolName: 'LSU', brandLogos: ['Nike', 'Gatorade', "Raising Cane's"], monthlyImpressions: 680000, estimatedValue: 35000 },
-    { schoolName: 'Penn State', brandLogos: ['Nike', 'Wegmans'], monthlyImpressions: 420000, estimatedValue: 22000 },
-    { schoolName: 'Texas A&M', brandLogos: ['Nike', 'H-E-B'], monthlyImpressions: 550000, estimatedValue: 28000 },
-    { schoolName: 'Auburn', brandLogos: ['Nike'], monthlyImpressions: 380000, estimatedValue: 18000 },
-    { schoolName: 'Tennessee', brandLogos: ['Nike', 'Adidas'], monthlyImpressions: 460000, estimatedValue: 24000 },
-    { schoolName: 'USC', brandLogos: ['Nike'], monthlyImpressions: 520000, estimatedValue: 26000 },
+    { schoolName: 'Nebraska', brandLogos: ['Nike', 'Adidas', 'Gatorade'] },
+    { schoolName: 'Alabama', brandLogos: ['Nike', "Raising Cane's", 'H-E-B'] },
+    { schoolName: 'LSU', brandLogos: ['Nike', 'Gatorade', "Raising Cane's"] },
+    { schoolName: 'Penn State', brandLogos: ['Nike', 'Wegmans'] },
+    { schoolName: 'Texas A&M', brandLogos: ['Nike', 'H-E-B'] },
+    { schoolName: 'Auburn', brandLogos: ['Nike'] },
+    { schoolName: 'Tennessee', brandLogos: ['Nike', 'Adidas'] },
+    { schoolName: 'USC', brandLogos: ['Nike'] },
   ];
 
   const schoolsWithTeamPageSponsors = teamPagePlacements.length;
-  const schoolsWithZeroSponsors = 20 - schoolsWithTeamPageSponsors;
-  const totalTeamPageValue = teamPagePlacements.reduce((sum, p) => sum + p.estimatedValue, 0);
+  const totalBrandLogos = teamPagePlacements.reduce((sum, p) => sum + p.brandLogos.length, 0);
 
   useEffect(() => {
     async function loadSponsoredPosts() {
@@ -83,7 +80,7 @@ export default function BrandPartnershipDashboard() {
         { label: 'Athletes with Sponsors', value: athletesWithSponsors.toLocaleString() },
         { label: 'Avg Engagement Per Post', value: `${avgEngagementPerPost.toFixed(1)}%` },
         { label: 'Schools with Team Page Sponsors', value: schoolsWithTeamPageSponsors },
-        { label: 'Total Team Page Revenue', value: `$${(totalTeamPageValue / 1000).toFixed(0)}K/month` },
+        { label: 'Total Brand Placements', value: totalBrandLogos },
       ],
       tables: [
         {
@@ -98,12 +95,11 @@ export default function BrandPartnershipDashboard() {
         },
         {
           title: 'Team Page Sponsorships',
-          headers: ['School', 'Brand Logos', 'Monthly Impressions', 'Estimated Value'],
+          headers: ['School', 'Brand Logos', '# Sponsors'],
           rows: teamPagePlacements.map(placement => [
             placement.schoolName,
             placement.brandLogos.join(', '),
-            placement.monthlyImpressions.toLocaleString(),
-            `$${(placement.estimatedValue / 1000).toFixed(0)}K`,
+            placement.brandLogos.length,
           ]),
         },
       ],
@@ -289,43 +285,32 @@ export default function BrandPartnershipDashboard() {
         {activeTab === 'teampage' && (
           <div className="space-y-6">
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
                 <div className="flex items-center gap-2 mb-2">
                   <Building2 className="w-5 h-5 text-[#3B9FD9]" />
-                  <div className="text-gray-300 text-sm">Teams with Sponsors</div>
+                  <div className="text-gray-300 text-sm">Schools with Placements</div>
                 </div>
-                <div className="text-4xl font-bold text-white">{schoolsWithTeamPageSponsors}/10</div>
-                <div className="text-xs text-[#3B9FD9] mt-1">Monetized team pages</div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-5 h-5 text-[#3B9FD9]" />
-                  <div className="text-gray-300 text-sm">Monthly Impressions</div>
-                </div>
-                <div className="text-4xl font-bold text-white">
-                  {(teamPagePlacements.reduce((sum, p) => sum + p.monthlyImpressions, 0) / 1000000).toFixed(1)}M
-                </div>
-                <div className="text-xs text-gray-400 mt-1">Guaranteed visibility</div>
+                <div className="text-4xl font-bold text-white">{schoolsWithTeamPageSponsors}</div>
+                <div className="text-xs text-[#3B9FD9] mt-1">Team pages with brand logos</div>
               </div>
 
               <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="w-5 h-5 text-[#3B9FD9]" />
-                  <div className="text-gray-300 text-sm">Monthly Revenue</div>
+                  <div className="text-gray-300 text-sm">Total Brand Placements</div>
                 </div>
-                <div className="text-4xl font-bold text-white">${(totalTeamPageValue / 1000).toFixed(0)}K</div>
-                <div className="text-xs text-gray-400 mt-1">From {schoolsWithTeamPageSponsors} schools</div>
+                <div className="text-4xl font-bold text-white">{totalBrandLogos}</div>
+                <div className="text-xs text-gray-400 mt-1">Across all team pages</div>
               </div>
 
               <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-5 h-5 text-[#3B9FD9]" />
-                  <div className="text-gray-300 text-sm">Growth Opportunities</div>
+                  <div className="text-gray-300 text-sm">Avg Brands per Team</div>
                 </div>
-                <div className="text-4xl font-bold text-white">{schoolsWithZeroSponsors}</div>
-                <div className="text-xs text-[#3B9FD9] mt-1">Schools ready to activate</div>
+                <div className="text-4xl font-bold text-white">{(totalBrandLogos / schoolsWithTeamPageSponsors).toFixed(1)}</div>
+                <div className="text-xs text-[#3B9FD9] mt-1">Brand density</div>
               </div>
             </div>
 
@@ -339,8 +324,6 @@ export default function BrandPartnershipDashboard() {
                       <th className="text-left py-3 px-4 text-gray-300 font-semibold">School</th>
                       <th className="text-left py-3 px-4 text-gray-300 font-semibold">Brand Logos</th>
                       <th className="text-right py-3 px-4 text-gray-300 font-semibold"># Sponsors</th>
-                      <th className="text-right py-3 px-4 text-gray-300 font-semibold">Monthly Impressions</th>
-                      <th className="text-right py-3 px-4 text-gray-300 font-semibold">Est. Monthly Value</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -357,8 +340,6 @@ export default function BrandPartnershipDashboard() {
                           </div>
                         </td>
                         <td className="py-3 px-4 text-right text-white font-bold">{placement.brandLogos.length}</td>
-                        <td className="py-3 px-4 text-right text-[#3B9FD9]">{(placement.monthlyImpressions / 1000).toFixed(0)}K</td>
-                        <td className="py-3 px-4 text-right text-white font-bold">${(placement.estimatedValue / 1000).toFixed(0)}K</td>
                       </tr>
                     ))}
                   </tbody>
@@ -382,9 +363,9 @@ export default function BrandPartnershipDashboard() {
                 <div>
                   <div className="text-[#3B9FD9] font-semibold mb-2">✓ Team Page Sponsorships (Growing)</div>
                   <div className="text-gray-200 text-sm">
-                    • {schoolsWithTeamPageSponsors} schools actively monetized<br />
-                    • ${(totalTeamPageValue / 1000).toFixed(0)}K monthly revenue generated<br />
-                    • {schoolsWithZeroSponsors} additional schools ready to activate<br />
+                    • {schoolsWithTeamPageSponsors} schools with active brand placements<br />
+                    • {totalBrandLogos} total brand logos visible on team pages<br />
+                    • Average of {(totalBrandLogos / schoolsWithTeamPageSponsors).toFixed(1)} brands per team page<br />
                     • Revenue driver: Guaranteed placement fees, CPM rates
                   </div>
                 </div>
