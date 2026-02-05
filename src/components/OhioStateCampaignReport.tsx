@@ -127,8 +127,23 @@ const groupByAthlete = (posts: OhioPost[]) => {
   return map;
 };
 
-const formatCampaignName = (campaignName: string) =>
-  campaignName.replace(/_/g, ' ').replace(/-W(\d+)/, ' - W$1');
+const titleCase = (value: string) =>
+  value
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+const formatCampaignName = (campaignName: string) => {
+  const normalized = campaignName
+    .replace(/@/g, '')
+    .replace(/\./g, ' ')
+    .replace(/_/g, ' ')
+    .replace(/-W(\d+)/i, ' - Week $1')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return titleCase(normalized);
+};
 
 const getLiftPercent = (value: number, baseline: number) =>
   baseline > 0 ? ((value - baseline) / baseline) * 100 : 0;
@@ -220,6 +235,8 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
     };
   }, [topPostsMetric]);
 
+  const topPostsBarRows = useMemo(() => sortedCampaignPosts, [sortedCampaignPosts]);
+
   const athleteBenchmarks = useMemo(() => {
     return Array.from(campaignAthleteIds).map((athleteId) => {
       const campaignAthletePosts = campaignPosts.filter((post) => getAthleteKey(post) === athleteId);
@@ -247,9 +264,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
         liftVsSponsored: getLiftPercent(campaignAvgLikes, sponsoredAvgLikes),
         liftVsAll: getLiftPercent(campaignAvgLikes, allAvgLikes),
       };
-    })
-      .sort((a, b) => b.campaignAvgLikes - a.campaignAvgLikes)
-      .slice(0, 5);
+    }).sort((a, b) => b.campaignAvgLikes - a.campaignAvgLikes);
   }, [campaignAthleteIds, campaignPosts, sponsoredByAthlete, unsponsoredByAthlete]);
 
   const commentLikeRatio = campaignSummary.totalLikes > 0
@@ -282,9 +297,22 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
 
   const donutRadius = 52;
   const donutCircumference = 2 * Math.PI * donutRadius;
+  const donutGradientId = 'osu-likes-gradient';
   const donutSegments = [
-    { label: 'Likes', value: engagementMix.likes, pct: engagementMix.likesPct, color: '#BB0000' },
-    { label: 'Comments', value: engagementMix.comments, pct: engagementMix.commentsPct, color: '#F2B9B9' },
+    {
+      label: 'Likes',
+      value: engagementMix.likes,
+      pct: engagementMix.likesPct,
+      stroke: `url(#${donutGradientId})`,
+      dot: '#BB0000'
+    },
+    {
+      label: 'Comments',
+      value: engagementMix.comments,
+      pct: engagementMix.commentsPct,
+      stroke: '#F2B9B9',
+      dot: '#F2B9B9'
+    },
   ];
   let donutOffset = 0;
 
@@ -442,15 +470,25 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.4fr] gap-6">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col h-[320px]">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-white/60">Engagement Mix</p>
                 <h3 className="osu-display text-2xl mt-2">Likes vs Comments</h3>
                 <p className="text-white/60 text-sm mt-1">Breakdown of campaign engagement sources.</p>
               </div>
-              <div className="flex items-center gap-6">
-                <div className="relative w-40 h-40">
+              <div className="flex items-center justify-center flex-1">
+                <div className="flex items-center justify-center gap-8 w-full max-w-[520px]">
+                  <div className="relative w-44 h-44">
                   <svg viewBox="0 0 140 140" className="w-full h-full">
+                    <defs>
+                      <linearGradient id={donutGradientId} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#BB0000" />
+                        <stop offset="100%" stopColor="#5A0000" />
+                      </linearGradient>
+                      <filter id="osu-donut-glow">
+                        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="rgba(255,255,255,0.25)" />
+                      </filter>
+                    </defs>
                     <circle
                       cx="70"
                       cy="70"
@@ -458,6 +496,15 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                       fill="none"
                       stroke="rgba(255,255,255,0.08)"
                       strokeWidth="14"
+                    />
+                    <circle
+                      cx="70"
+                      cy="70"
+                      r={donutRadius - 18}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.15)"
+                      strokeWidth="1"
+                      filter="url(#osu-donut-glow)"
                     />
                     {donutSegments.map((segment) => {
                       const segmentLength = (segment.pct / 100) * donutCircumference;
@@ -471,7 +518,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                           cy="70"
                           r={donutRadius}
                           fill="none"
-                          stroke={segment.color}
+                          stroke={segment.stroke}
                           strokeWidth="14"
                           strokeDasharray={strokeDasharray}
                           strokeDashoffset={strokeDashoffset}
@@ -482,29 +529,30 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                     })}
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <div className="text-xl font-semibold">{formatCompactNumber(engagementMix.total)}</div>
+                    <div className="text-2xl font-semibold">{formatCompactNumber(engagementMix.total)}</div>
                     <div className="text-xs uppercase tracking-[0.3em] text-white/60">Total</div>
                   </div>
-                </div>
-                <div className="space-y-3 text-sm">
+                  </div>
+                  <div className="w-full max-w-[220px] space-y-3 text-sm">
                   {donutSegments.map((segment) => (
-                    <div key={segment.label} className="flex items-center gap-3">
-                      <span
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: segment.color }}
-                      />
-                      <div className="flex-1">
+                    <div key={segment.label} className="flex items-center justify-between gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: segment.dot }}
+                        />
                         <div className="text-white/80 text-xs uppercase tracking-[0.2em]">{segment.label}</div>
-                        <div className="text-white font-semibold">
-                          {formatCompactNumber(segment.value)} • {segment.pct.toFixed(1)}%
-                        </div>
+                      </div>
+                      <div className="text-white font-semibold text-sm">
+                        {formatCompactNumber(segment.value)} • {segment.pct.toFixed(1)}%
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="bg-black/50 border border-white/10 rounded-2xl p-6">
+            <div className="bg-black/50 border border-white/10 rounded-2xl p-6 flex flex-col h-[320px]">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <h3 className="osu-display text-2xl mb-2">{topPostsMetricConfig.title}</h3>
@@ -533,21 +581,22 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                   ))}
                 </div>
               </div>
-              <div className="mt-6 space-y-4">
-                {topPosts.length === 0 && (
+              <div className="mt-4 space-y-4 flex-1 overflow-y-auto pr-2">
+                {sortedCampaignPosts.length === 0 && (
                   <div className="text-white/60 text-sm">No posts available for this campaign.</div>
                 )}
-                {topPosts.map((post, index) => {
+                {topPostsBarRows.map((post, index) => {
                   const maxValue = Math.max(
-                    ...topPosts.map((item) => topPostsMetricConfig.getValue(item)),
+                    ...sortedCampaignPosts.map((item) => topPostsMetricConfig.getValue(item)),
                     1
                   );
                   const value = topPostsMetricConfig.getValue(post);
+                  const label = post.athlete?.name ?? 'Ohio State Athlete';
                   return (
                     <div key={post._id} className="space-y-2">
                       <div className="flex items-center justify-between text-xs uppercase tracking-[0.25em] text-white/60">
                         <span>
-                          #{index + 1} {post.athlete?.name ?? 'Ohio State Athlete'}
+                          #{index + 1} {label}
                         </span>
                         <span>{topPostsMetricConfig.formatValue(value)}</span>
                       </div>
@@ -780,7 +829,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 <p className="text-white/60 text-sm">Top athletes from this campaign and their lift vs baselines.</p>
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
               {athleteBenchmarks.map((athlete) => (
                 <div
                   key={athlete.athleteId}
