@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ArrowLeft, ChevronDown, BarChart3, Flame } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { ArrowLeft, ChevronDown, BarChart3, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { OHIO_STATE } from '../data/schoolConfig';
 import groupedCampaigns from '../data/grouped_campaigns_multi_post_only.json';
@@ -138,6 +138,8 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   const [selectedCampaign, setSelectedCampaign] = useState<string>(
     sortedCampaigns[0]?.campaignName ?? ''
   );
+  const [topPostsMetric, setTopPostsMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
+  const [benchmarkMetric, setBenchmarkMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
 
   const selectedCampaignGroup = useMemo(() => {
     return (
@@ -185,12 +187,38 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
 
   const campaignEmv = useMemo(() => calculateCampaignEMV(buildEmvInput(campaignPosts)), [campaignPosts]);
 
-  const topPosts = useMemo(() => {
+  const sortedCampaignPosts = useMemo(() => {
     return campaignPosts
       .slice()
-      .sort((a, b) => (b.metrics?.likes ?? 0) - (a.metrics?.likes ?? 0))
-      .slice(0, 4);
+      .sort((a, b) => (b.metrics?.likes ?? 0) - (a.metrics?.likes ?? 0));
   }, [campaignPosts]);
+
+  const topPosts = useMemo(() => sortedCampaignPosts.slice(0, 4), [sortedCampaignPosts]);
+
+  const topPostsMetricConfig = useMemo(() => {
+    if (topPostsMetric === 'comments') {
+      return {
+        title: 'Top Posts - Comments',
+        description: 'Horizontal ranking of the top campaign posts by comments.',
+        getValue: (post: OhioPost) => post.metrics?.comments ?? 0,
+        formatValue: (value: number) => formatCompactNumber(value),
+      };
+    }
+    if (topPostsMetric === 'engagementRate') {
+      return {
+        title: 'Top Posts - Engagement Rate',
+        description: 'Horizontal ranking of the top campaign posts by engagement rate.',
+        getValue: (post: OhioPost) => (post.metrics?.engagementRate ?? 0) * 100,
+        formatValue: (value: number) => `${value.toFixed(1)}%`,
+      };
+    }
+    return {
+      title: 'Top Posts - Likes',
+      description: 'Horizontal ranking of the top campaign posts by likes.',
+      getValue: (post: OhioPost) => post.metrics?.likes ?? 0,
+      formatValue: (value: number) => formatCompactNumber(value),
+    };
+  }, [topPostsMetric]);
 
   const athleteBenchmarks = useMemo(() => {
     return Array.from(campaignAthleteIds).map((athleteId) => {
@@ -228,6 +256,17 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
     ? (campaignSummary.totalComments / campaignSummary.totalLikes) * 100
     : 0;
 
+  const topPostsCarouselRef = useRef<HTMLDivElement>(null);
+  const scrollTopPostsCarousel = (direction: 'left' | 'right') => {
+    const container = topPostsCarouselRef.current;
+    if (!container) return;
+    const firstCard = container.querySelector<HTMLElement>('[data-carousel-card="true"]');
+    const cardWidth = firstCard?.offsetWidth ?? 320;
+    const gap = 24;
+    const delta = (cardWidth + gap) * (direction === 'left' ? -1 : 1);
+    container.scrollBy({ left: delta, behavior: 'smooth' });
+  };
+
   const engagementMix = useMemo(() => {
     const likes = campaignSummary.totalLikes;
     const comments = campaignSummary.totalComments;
@@ -249,22 +288,47 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   ];
   let donutOffset = 0;
 
-  const benchmarkCards = [
-    {
+  const benchmarkCard = useMemo(() => {
+    if (benchmarkMetric === 'comments') {
+      return {
+        title: 'Average Comments',
+        campaignValue: campaignSummary.postCount ? campaignSummary.totalComments / campaignSummary.postCount : 0,
+        sponsoredValue: sponsoredSummary.postCount ? sponsoredSummary.totalComments / sponsoredSummary.postCount : 0,
+        allValue: allSummary.postCount ? allSummary.totalComments / allSummary.postCount : 0,
+        formatter: formatCompactNumber,
+      };
+    }
+    if (benchmarkMetric === 'engagementRate') {
+      return {
+        title: 'Engagement Rate',
+        campaignValue: campaignSummary.avgEngagementRate * 100,
+        sponsoredValue: sponsoredSummary.avgEngagementRate * 100,
+        allValue: allSummary.avgEngagementRate * 100,
+        formatter: formatPercent,
+      };
+    }
+    return {
       title: 'Average Likes',
       campaignValue: campaignSummary.postCount ? campaignSummary.totalLikes / campaignSummary.postCount : 0,
       sponsoredValue: sponsoredSummary.postCount ? sponsoredSummary.totalLikes / sponsoredSummary.postCount : 0,
       allValue: allSummary.postCount ? allSummary.totalLikes / allSummary.postCount : 0,
       formatter: formatCompactNumber,
-    },
-    {
-      title: 'Engagement Rate',
-      campaignValue: campaignSummary.avgEngagementRate * 100,
-      sponsoredValue: sponsoredSummary.avgEngagementRate * 100,
-      allValue: allSummary.avgEngagementRate * 100,
-      formatter: formatPercent,
-    },
-  ];
+    };
+  }, [
+    benchmarkMetric,
+    campaignSummary.postCount,
+    campaignSummary.totalLikes,
+    campaignSummary.totalComments,
+    campaignSummary.avgEngagementRate,
+    sponsoredSummary.postCount,
+    sponsoredSummary.totalLikes,
+    sponsoredSummary.totalComments,
+    sponsoredSummary.avgEngagementRate,
+    allSummary.postCount,
+    allSummary.totalLikes,
+    allSummary.totalComments,
+    allSummary.avgEngagementRate,
+  ]);
 
   return (
     <div className="min-h-screen bg-[#070708] text-white osu-report">
@@ -441,29 +505,56 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
               </div>
             </div>
             <div className="bg-black/50 border border-white/10 rounded-2xl p-6">
-              <h3 className="osu-display text-2xl mb-2">Top Posts - Likes</h3>
-              <p className="text-white/60 text-sm">
-                Horizontal ranking of the top campaign posts by likes.
-              </p>
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h3 className="osu-display text-2xl mb-2">{topPostsMetricConfig.title}</h3>
+                  <p className="text-white/60 text-sm">
+                    {topPostsMetricConfig.description}
+                  </p>
+                </div>
+                <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+                  {([
+                    { id: 'likes', label: 'Likes' },
+                    { id: 'comments', label: 'Comments' },
+                    { id: 'engagementRate', label: 'Eng. Rate' },
+                  ] as const).map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setTopPostsMetric(option.id)}
+                      className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
+                        topPostsMetric === option.id
+                          ? 'bg-[#BB0000] text-white'
+                          : 'text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="mt-6 space-y-4">
                 {topPosts.length === 0 && (
                   <div className="text-white/60 text-sm">No posts available for this campaign.</div>
                 )}
                 {topPosts.map((post, index) => {
-                  const maxLikes = Math.max(...topPosts.map((item) => item.metrics?.likes ?? 0), 1);
-                  const likes = post.metrics?.likes ?? 0;
+                  const maxValue = Math.max(
+                    ...topPosts.map((item) => topPostsMetricConfig.getValue(item)),
+                    1
+                  );
+                  const value = topPostsMetricConfig.getValue(post);
                   return (
                     <div key={post._id} className="space-y-2">
                       <div className="flex items-center justify-between text-xs uppercase tracking-[0.25em] text-white/60">
                         <span>
                           #{index + 1} {post.athlete?.name ?? 'Ohio State Athlete'}
                         </span>
-                        <span>{formatCompactNumber(likes)}</span>
+                        <span>{topPostsMetricConfig.formatValue(value)}</span>
                       </div>
                       <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                         <div
                           className="h-full bg-[#BB0000]"
-                          style={{ width: `${(likes / maxLikes) * 100}%` }}
+                          style={{ width: `${(value / maxValue) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -486,61 +577,85 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             </div>
           </div>
 
-          {topPosts.length === 0 ? (
+          {sortedCampaignPosts.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-white/60">
               No sponsored posts found for this campaign yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {topPosts.map((post, index) => (
-                <a
-                  key={post._id}
-                  href={post.permalink || '#'}
-                  target={post.permalink ? '_blank' : undefined}
-                  rel="noreferrer"
-                  className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-[#BB0000]/60 transition-colors"
+            <div className="relative">
+              <div className="absolute right-0 top-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollTopPostsCarousel('left')}
+                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+                  aria-label="Scroll posts left"
                 >
-                  <div className="relative aspect-[4/5] bg-black/60">
-                    {post.url && (
-                      <img
-                        src={post.url}
-                        alt={post.caption || 'Ohio State post'}
-                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
-                    <div className="absolute top-4 left-4 flex items-center gap-2">
-                      <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                        {post.source ?? 'SOCIAL'}
-                      </span>
-                      <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
-                        {post.mediaType ?? 'POST'}
-                      </span>
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTopPostsCarousel('right')}
+                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+                  aria-label="Scroll posts right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+              <div
+                ref={topPostsCarouselRef}
+                className="mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth"
+              >
+                {sortedCampaignPosts.map((post, index) => (
+                  <a
+                    key={post._id}
+                    href={post.permalink || '#'}
+                    target={post.permalink ? '_blank' : undefined}
+                    rel="noreferrer"
+                    data-carousel-card="true"
+                    className="group min-w-[280px] md:min-w-[320px] lg:min-w-[360px] snap-start bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-[#BB0000]/60 transition-colors"
+                  >
+                    <div className="relative aspect-[4/5] bg-black/60">
+                      {post.url && (
+                        <img
+                          src={post.url}
+                          alt={post.caption || 'Ohio State post'}
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+                      <div className="absolute top-4 left-4 flex items-center gap-2">
+                        <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                          {post.source ?? 'SOCIAL'}
+                        </span>
+                        <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
+                          {post.mediaType ?? 'POST'}
+                        </span>
+                      </div>
+                      <div className="absolute top-4 right-4 h-10 w-10 rounded-full bg-[#BB0000] flex items-center justify-center text-white font-bold">
+                        #{index + 1}
+                      </div>
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <p className="text-white text-lg font-semibold line-clamp-2">
+                          {post.athlete?.name ?? 'Ohio State Athlete'}
+                        </p>
+                        <p className="text-white/70 text-sm">{getPostDateLabel(post)}</p>
+                      </div>
                     </div>
-                    <div className="absolute top-4 right-4 h-10 w-10 rounded-full bg-[#BB0000] flex items-center justify-center text-white font-bold">
-                      #{index + 1}
+                    <div className="p-4 space-y-2">
+                      <p className="text-sm text-white/70 line-clamp-2">{post.caption ?? 'Sponsored post'}</p>
+                      <div className="flex items-center justify-between text-xs text-white/70">
+                        <span>Likes</span>
+                        <span className="text-white font-semibold">{formatCompactNumber(post.metrics?.likes ?? 0)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-white/70">
+                        <span>Comments</span>
+                        <span className="text-white font-semibold">{formatCompactNumber(post.metrics?.comments ?? 0)}</span>
+                      </div>
                     </div>
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <p className="text-white text-lg font-semibold line-clamp-2">
-                        {post.athlete?.name ?? 'Ohio State Athlete'}
-                      </p>
-                      <p className="text-white/70 text-sm">{getPostDateLabel(post)}</p>
-                    </div>
-                  </div>
-                  <div className="p-4 space-y-2">
-                    <p className="text-sm text-white/70 line-clamp-2">{post.caption ?? 'Sponsored post'}</p>
-                    <div className="flex items-center justify-between text-xs text-white/70">
-                      <span>Likes</span>
-                      <span className="text-white font-semibold">{formatCompactNumber(post.metrics?.likes ?? 0)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-white/70">
-                      <span>Comments</span>
-                      <span className="text-white font-semibold">{formatCompactNumber(post.metrics?.comments ?? 0)}</span>
-                    </div>
-                  </div>
-                </a>
-              ))}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </section>
@@ -559,33 +674,89 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {benchmarkCards.map((card) => {
-              const maxValue = Math.max(card.campaignValue, card.sponsoredValue, card.allValue, 1);
-              const liftVsSponsored = getLiftPercent(card.campaignValue, card.sponsoredValue);
-              const liftVsAll = getLiftPercent(card.campaignValue, card.allValue);
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                label: 'Campaign',
+                description: 'Posts from the selected campaign.',
+                posts: campaignSummary.postCount,
+              },
+              {
+                label: 'Sponsored',
+                description: 'All sponsored posts from these athletes.',
+                posts: sponsoredSummary.postCount,
+              },
+              {
+                label: 'All posts',
+                description: 'Sponsored and unsponsored posts from these athletes.',
+                posts: allSummary.postCount,
+              },
+            ].map((item) => (
+              <div key={item.label} className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <p className="text-xs uppercase tracking-[0.35em] text-white/60">{item.label}</p>
+                <p className="text-lg font-semibold mt-2">{item.posts.toLocaleString()} posts</p>
+                <p className="text-white/60 text-sm mt-1">{item.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <h3 className="osu-display text-xl tracking-wide">{benchmarkCard.title}</h3>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+                {([
+                  { id: 'likes', label: 'Likes' },
+                  { id: 'comments', label: 'Comments' },
+                  { id: 'engagementRate', label: 'Eng. Rate' },
+                ] as const).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setBenchmarkMetric(option.id)}
+                    className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
+                      benchmarkMetric === option.id
+                        ? 'bg-[#BB0000] text-white'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(() => {
+              const maxValue = Math.max(
+                benchmarkCard.campaignValue,
+                benchmarkCard.sponsoredValue,
+                benchmarkCard.allValue,
+                1
+              );
+              const liftVsSponsored = getLiftPercent(benchmarkCard.campaignValue, benchmarkCard.sponsoredValue);
+              const liftVsAll = getLiftPercent(benchmarkCard.campaignValue, benchmarkCard.allValue);
 
               return (
-                <div key={card.title} className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                  <h3 className="osu-display text-xl tracking-wide mb-4">{card.title}</h3>
-                  {[
-                    { label: 'Campaign', value: card.campaignValue, tone: 'bg-[#BB0000]' },
-                    { label: 'Sponsored', value: card.sponsoredValue, tone: 'bg-white/30' },
-                    { label: 'All posts', value: card.allValue, tone: 'bg-white/15' },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center gap-4 mb-3">
-                      <div className="w-40 text-xs text-white/70">{row.label}</div>
-                      <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className={`h-full ${row.tone}`}
-                          style={{ width: `${(row.value / maxValue) * 100}%` }}
-                        />
+                <>
+                  <div className="mt-4">
+                    {[
+                      { label: 'Campaign', value: benchmarkCard.campaignValue, tone: 'bg-[#BB0000]' },
+                      { label: 'Sponsored', value: benchmarkCard.sponsoredValue, tone: 'bg-white/30' },
+                      { label: 'All posts', value: benchmarkCard.allValue, tone: 'bg-white/15' },
+                    ].map((row) => (
+                      <div key={row.label} className="flex items-center gap-4 mb-3">
+                        <div className="w-40 text-xs text-white/70">{row.label}</div>
+                        <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className={`h-full ${row.tone}`}
+                            style={{ width: `${(row.value / maxValue) * 100}%` }}
+                          />
+                        </div>
+                        <div className="w-16 text-right text-sm font-semibold">
+                          {benchmarkCard.formatter(row.value)}
+                        </div>
                       </div>
-                      <div className="w-16 text-right text-sm font-semibold">
-                        {card.formatter(row.value)}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                   <div className="mt-4 text-xs text-white/70 uppercase tracking-[0.28em]">Lift</div>
                   <div className="flex flex-wrap gap-3 mt-2 text-sm">
                     <span className="px-3 py-1 rounded-full bg-[#BB0000]/20 text-[#FFB3B3]">
@@ -597,9 +768,9 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                       {liftVsSponsored.toFixed(1)}% vs sponsored
                     </span>
                   </div>
-                </div>
+                </>
               );
-            })}
+            })()}
           </div>
 
           <div className="bg-black/50 border border-white/10 rounded-2xl p-6">
