@@ -216,6 +216,24 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   const sponsoredByAthlete = useMemo(() => groupByAthlete(ohioSponsored), []);
   const unsponsoredByAthlete = useMemo(() => groupByAthlete(ohioUnsponsored), []);
 
+  const athleteProfileMap = useMemo(() => {
+    const map = new Map<string, { name?: string; sport?: string }>();
+    const allPosts = [...ohioSponsored, ...ohioUnsponsored];
+    allPosts.forEach((post) => {
+      const id = post.athlete?._id;
+      if (!id) return;
+      const isCollab = (post.collaborationAthleteIds?.length ?? 0) > 1;
+      if (isCollab) return;
+      if (!map.has(id)) {
+        map.set(id, {
+          name: post.athlete?.name,
+          sport: post.athlete?.sport,
+        });
+      }
+    });
+    return map;
+  }, []);
+
   const engagementRateByAthlete = useMemo(() => {
     const totals = new Map<string, { sum: number; count: number }>();
     const allPosts = [...ohioSponsored, ...ohioUnsponsored];
@@ -329,14 +347,16 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
       return {
         athleteId,
         name:
-          sponsoredAthletePosts[0]?.athlete?.name
-          ?? unsponsoredAthletePosts[0]?.athlete?.name
-          ?? campaignAthletePosts[0]?.athlete?.name
+          athleteProfileMap.get(athleteId)?.name
+          ?? sponsoredAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.name
+          ?? unsponsoredAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.name
+          ?? campaignAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.name
           ?? 'Unknown athlete',
         sport:
-          sponsoredAthletePosts[0]?.athlete?.sport
-          ?? unsponsoredAthletePosts[0]?.athlete?.sport
-          ?? campaignAthletePosts[0]?.athlete?.sport
+          athleteProfileMap.get(athleteId)?.sport
+          ?? sponsoredAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.sport
+          ?? unsponsoredAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.sport
+          ?? campaignAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.sport
           ?? 'N/A',
         campaignAvgLikes,
         liftVsSponsored: getLiftPercent(campaignAvgLikes, sponsoredAvgLikes),
