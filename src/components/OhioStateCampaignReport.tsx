@@ -33,6 +33,7 @@ interface OhioPost {
   sponsorPartner?: string;
   url?: string;
   permalink?: string;
+  collaborationAthleteIds?: string[];
   metrics?: {
     comments?: number;
     likes?: number;
@@ -55,6 +56,7 @@ const sortedCampaigns = campaignGroups
   .sort((a, b) => b.postIds.length - a.postIds.length);
 const ohioSponsored = ohioSponsoredRaw as OhioPost[];
 const ohioUnsponsored = ohioUnsponsoredRaw as OhioPost[];
+const DEFAULT_CAMPAIGN_NAME = 'Fortnite - Caleb Downs x Carnell Tate';
 
 const formatCompactNumber = (value: number) => {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
@@ -64,7 +66,21 @@ const formatCompactNumber = (value: number) => {
 
 const formatPercent = (value: number) => `${value.toFixed(1)}%`;
 
-const getAthleteKey = (post: OhioPost) => post.athlete?._id || post.athlete?.name || 'unknown';
+const getAthleteKeys = (post: OhioPost) => {
+  const keys = new Set<string>();
+  if (post.athlete?._id) {
+    keys.add(post.athlete._id);
+  } else if (post.athlete?.name) {
+    keys.add(post.athlete.name);
+  }
+  if (post.collaborationAthleteIds?.length) {
+    post.collaborationAthleteIds.forEach((id) => keys.add(id));
+  }
+  return Array.from(keys);
+};
+
+const postHasAthlete = (post: OhioPost, athleteId: string) =>
+  getAthleteKeys(post).includes(athleteId);
 
 const getPostDateLabel = (post: OhioPost) => {
   const dateValue = post.publishedAt?.$date || post.createdAt?.$date;
@@ -100,7 +116,10 @@ const summarizePosts = (posts: OhioPost[]) => {
     { likes: 0, comments: 0, shares: 0, saves: 0, engagements: 0, engagementRateSum: 0 }
   );
 
-  const uniqueAthletes = new Set(posts.map(getAthleteKey));
+  const uniqueAthletes = new Set<string>();
+  posts.forEach((post) => {
+    getAthleteKeys(post).forEach((id) => uniqueAthletes.add(id));
+  });
   const avgEngagementRate = posts.length > 0 ? totals.engagementRateSum / posts.length : 0;
 
   return {
@@ -118,11 +137,12 @@ const summarizePosts = (posts: OhioPost[]) => {
 const groupByAthlete = (posts: OhioPost[]) => {
   const map = new Map<string, OhioPost[]>();
   posts.forEach((post) => {
-    const key = getAthleteKey(post);
-    if (!map.has(key)) {
-      map.set(key, []);
-    }
-    map.get(key)?.push(post);
+    getAthleteKeys(post).forEach((key) => {
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key)?.push(post);
+    });
   });
   return map;
 };
@@ -150,9 +170,10 @@ const getLiftPercent = (value: number, baseline: number) =>
 
 export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps) {
   const reportDate = format(new Date(), 'MMMM dd, yyyy');
-  const [selectedCampaign, setSelectedCampaign] = useState<string>(
-    sortedCampaigns[0]?.campaignName ?? ''
-  );
+  const [selectedCampaign, setSelectedCampaign] = useState<string>(() => {
+    const match = sortedCampaigns.find((campaign) => campaign.campaignName === DEFAULT_CAMPAIGN_NAME);
+    return match?.campaignName ?? sortedCampaigns[0]?.campaignName ?? '';
+  });
   const [topPostsMetric, setTopPostsMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
   const [benchmarkMetric, setBenchmarkMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
 
@@ -173,21 +194,24 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
     [campaignPostIds]
   );
 
-  const campaignAthleteIds = useMemo(
-    () => new Set(campaignPosts.map(getAthleteKey)),
-    [campaignPosts]
-  );
+  const campaignAthleteIds = useMemo(() => {
+    const ids = new Set<string>();
+    campaignPosts.forEach((post) => {
+      getAthleteKeys(post).forEach((id) => ids.add(id));
+    });
+    return ids;
+  }, [campaignPosts]);
 
   const sponsoredByAthlete = useMemo(() => groupByAthlete(ohioSponsored), []);
   const unsponsoredByAthlete = useMemo(() => groupByAthlete(ohioUnsponsored), []);
 
   const sponsoredSameAthletes = useMemo(
-    () => ohioSponsored.filter((post) => campaignAthleteIds.has(getAthleteKey(post))),
+    () => ohioSponsored.filter((post) => getAthleteKeys(post).some((id) => campaignAthleteIds.has(id))),
     [campaignAthleteIds]
   );
 
   const unsponsoredSameAthletes = useMemo(
-    () => ohioUnsponsored.filter((post) => campaignAthleteIds.has(getAthleteKey(post))),
+    () => ohioUnsponsored.filter((post) => getAthleteKeys(post).some((id) => campaignAthleteIds.has(id))),
     [campaignAthleteIds]
   );
 
@@ -238,7 +262,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
 
   const athleteBenchmarks = useMemo(() => {
     return Array.from(campaignAthleteIds).map((athleteId) => {
-      const campaignAthletePosts = campaignPosts.filter((post) => getAthleteKey(post) === athleteId);
+      const campaignAthletePosts = campaignPosts.filter((post) => postHasAthlete(post, athleteId));
       const sponsoredAthletePosts = sponsoredByAthlete.get(athleteId) ?? [];
       const unsponsoredAthletePosts = unsponsoredByAthlete.get(athleteId) ?? [];
       const allAthletePosts = [...sponsoredAthletePosts, ...unsponsoredAthletePosts];
@@ -257,8 +281,16 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
 
       return {
         athleteId,
-        name: campaignAthletePosts[0]?.athlete?.name ?? 'Unknown athlete',
-        sport: campaignAthletePosts[0]?.athlete?.sport ?? 'N/A',
+        name:
+          sponsoredAthletePosts[0]?.athlete?.name
+          ?? unsponsoredAthletePosts[0]?.athlete?.name
+          ?? campaignAthletePosts[0]?.athlete?.name
+          ?? 'Unknown athlete',
+        sport:
+          sponsoredAthletePosts[0]?.athlete?.sport
+          ?? unsponsoredAthletePosts[0]?.athlete?.sport
+          ?? campaignAthletePosts[0]?.athlete?.sport
+          ?? 'N/A',
         campaignAvgLikes,
         liftVsSponsored: getLiftPercent(campaignAvgLikes, sponsoredAvgLikes),
         liftVsAll: getLiftPercent(campaignAvgLikes, allAvgLikes),

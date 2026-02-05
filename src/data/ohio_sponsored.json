@@ -1,4 +1,67 @@
 [{
+  "_id": "fortnite_caleb_downs_carnell_tate",
+  "athlete": {
+    "_id": "68fca493b06066e3308741b0",
+    "name": "Caleb Downs x Carnell Tate",
+    "image": "",
+    "bio": "",
+    "sport": "FOOTBALL",
+    "position": "DB/WR",
+    "conference": {
+      "_id": "68d23e9a6f71af5707a79f20",
+      "name": "Big 10"
+    },
+    "school": {
+      "_id": "68e5c539c5a108ee73bb8419",
+      "name": "Ohio State"
+    },
+    "league": {
+      "_id": "68d23c396f71af5707a79f1c",
+      "name": "NCAA"
+    },
+    "year": "SOPHOMORE"
+  },
+  "caption": "Fortnite collab - Caleb Downs x Carnell Tate.",
+  "createdAt": {
+    "$date": "2026-02-05T00:00:00.000Z"
+  },
+  "hasOrganizationLogo": false,
+  "likeAndViewCountsDisabled": false,
+  "mediaType": "VIDEO",
+  "metrics": {
+    "comments": 121,
+    "likes": 37900,
+    "engagementRate": 0,
+    "shares": 0,
+    "saves": 0,
+    "impressions": 0,
+    "followers": 0,
+    "totalInteractions": 0,
+    "accountsEngaged": 0,
+    "videoViews": 0,
+    "reach": 0,
+    "profileLinksTaps": 0
+  },
+  "permalink": "https://www.instagram.com/reel/DR0ToMdAeaL/",
+  "publishedAt": {
+    "$date": "2026-02-05T00:00:00.000Z"
+  },
+  "source": "INSTAGRAM",
+  "sponsorPartner": "@fortnite",
+  "sponsored": true,
+  "updatedAt": {
+    "$date": "2026-02-05T00:00:00.000Z"
+  },
+  "url": "https://storage.googleapis.com/scraper-media-images-dev/588754276_18545644729035500_9043845904018133203_n.jpg",
+  "collaborationAthleteIds": [
+    "68fca493b06066e3308741b0",
+    "68fca493b06066e3308741cd"
+  ],
+  "isSponsored": true,
+  "isCollaboration": true,
+  "isOrganizationCollaboration": false
+},
+{
   "_id": "6964d235d624beb56eeab126",
   "athlete": {
     "_id": "68fca493b06066e3308741b3",
