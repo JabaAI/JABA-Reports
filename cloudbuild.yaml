@@ -28,7 +28,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'jaba-reports'
+      - '${_SERVICE_NAME}'
       - '--image'
       - 'gcr.io/$PROJECT_ID/jaba-reports:$COMMIT_SHA'
       - '--region'
@@ -55,6 +55,7 @@ images:
 # Substitution variables (can be overridden)
 substitutions:
   _REGION: 'us-central1'
+  _SERVICE_NAME: 'jaba-reports'
   _VITE_AVAILABLE_REPORTS: ''
 
 # Build options

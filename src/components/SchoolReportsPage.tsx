@@ -4,13 +4,14 @@ import { SCHOOLS, SchoolConfig } from '../data/schoolConfig';
 import { SchoolReportView } from './SchoolReportView';
 import { PlayflyReportHub } from './PlayflyReportHub';
 import { AuburnCampaignReport } from './AuburnCampaignReport';
+import { OhioStateCampaignReport } from './OhioStateCampaignReport';
 import { isSchoolEnabled } from '../config/reports';
 
 export function SchoolReportsPage() {
   const [selectedSchool, setSelectedSchool] = useState<SchoolConfig | null>(null);
 
-  // Show Playfly, Auburn, and Kentucky (filtered by VITE_AVAILABLE_REPORTS)
-  const allSchools = [SCHOOLS['playfly'], SCHOOLS['auburn'], SCHOOLS['kentucky']]
+  // Show Playfly, Auburn, Ohio State, and Kentucky (filtered by VITE_AVAILABLE_REPORTS)
+  const allSchools = [SCHOOLS['playfly'], SCHOOLS['auburn'], SCHOOLS['ohio-state'], SCHOOLS['kentucky']]
     .filter(Boolean)
     .filter((school) => isSchoolEnabled(school.id));
 
@@ -28,6 +29,12 @@ export function SchoolReportsPage() {
     if (selectedSchool.id === 'auburn') {
       return (
         <AuburnCampaignReport onBack={() => setSelectedSchool(null)} />
+      );
+    }
+    // If Ohio State is selected, show campaign report
+    if (selectedSchool.id === 'ohio-state') {
+      return (
+        <OhioStateCampaignReport onBack={() => setSelectedSchool(null)} />
       );
     }
     // If Kentucky is selected, show blank report for now
