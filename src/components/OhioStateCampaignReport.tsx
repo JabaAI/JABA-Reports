@@ -441,31 +441,34 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
               </div>
             </div>
             <div className="bg-black/50 border border-white/10 rounded-2xl p-6">
-              <h3 className="osu-display text-2xl mb-2">Engagement Quality</h3>
+              <h3 className="osu-display text-2xl mb-2">Top Posts - Likes</h3>
               <p className="text-white/60 text-sm">
-                Comments represent deeper engagement. Track shifts in the ratio to spot content driving conversation.
+                Horizontal ranking of the top campaign posts by likes.
               </p>
-              <div className="mt-6">
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.25em] text-white/60 mb-2">
-                  <span>Comment Share</span>
-                  <span>{engagementMix.commentsPct.toFixed(1)}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full bg-[#BB0000]"
-                    style={{ width: `${Math.min(engagementMix.commentsPct, 100)}%` }}
-                  />
-                </div>
-                <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.25em] text-white/60 mb-2">
-                  <span>Like Share</span>
-                  <span>{engagementMix.likesPct.toFixed(1)}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full bg-white/40"
-                    style={{ width: `${Math.min(engagementMix.likesPct, 100)}%` }}
-                  />
-                </div>
+              <div className="mt-6 space-y-4">
+                {topPosts.length === 0 && (
+                  <div className="text-white/60 text-sm">No posts available for this campaign.</div>
+                )}
+                {topPosts.map((post, index) => {
+                  const maxLikes = Math.max(...topPosts.map((item) => item.metrics?.likes ?? 0), 1);
+                  const likes = post.metrics?.likes ?? 0;
+                  return (
+                    <div key={post._id} className="space-y-2">
+                      <div className="flex items-center justify-between text-xs uppercase tracking-[0.25em] text-white/60">
+                        <span>
+                          #{index + 1} {post.athlete?.name ?? 'Ohio State Athlete'}
+                        </span>
+                        <span>{formatCompactNumber(likes)}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full bg-[#BB0000]"
+                          style={{ width: `${(likes / maxLikes) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -567,8 +570,8 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                   <h3 className="osu-display text-xl tracking-wide mb-4">{card.title}</h3>
                   {[
                     { label: 'Campaign', value: card.campaignValue, tone: 'bg-[#BB0000]' },
-                    { label: 'Sponsored (same athletes)', value: card.sponsoredValue, tone: 'bg-white/30' },
-                    { label: 'All posts (same athletes)', value: card.allValue, tone: 'bg-white/15' },
+                    { label: 'Sponsored', value: card.sponsoredValue, tone: 'bg-white/30' },
+                    { label: 'All posts', value: card.allValue, tone: 'bg-white/15' },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center gap-4 mb-3">
                       <div className="w-40 text-xs text-white/70">{row.label}</div>
