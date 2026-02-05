@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="140" viewBox="0 0 800 140" preserveAspectRatio="none">
+  <defs>
+    <!-- Rough edge distortion -->
+    <filter id="rough-edges" x="-2%" y="-6%" width="104%" height="112%">
+      <feTurbulence type="turbulence" baseFrequency="0.012 0.035" numOctaves="4" seed="3" stitchTiles="stitch" result="warp"/>
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- Paint streak texture - dark strokes -->
+    <filter id="streaks" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.25" numOctaves="3" seed="7" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="bw"/>
+      <feComponentTransfer in="bw">
+        <feFuncR type="linear" slope="2.5" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2.5" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2.5" intercept="-0.5"/>
+      </feComponentTransfer>
+    </filter>
+
+    <!-- Fine grain -->
+    <filter id="grain" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7 0.5" numOctaves="4" seed="2" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise"/>
+    </filter>
+
+    <!-- Dark edge vignette instead of white highlight -->
+    <linearGradient id="edge-darken" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="black" stop-opacity="0.04"/>
+      <stop offset="50%" stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bright red base -->
+  <g filter="url(#rough-edges)">
+    <rect x="2" y="3" width="796" height="134" rx="2" fill="#BB0000"/>
+  </g>
+
+  <!-- Dark streak texture (black/gray strokes) -->
+  <rect width="800" height="140" fill="#1a0000" opacity="0.35" filter="url(#streaks)"/>
+
+  <!-- Dark grain overlay -->
+  <rect width="800" height="140" fill="#222" filter="url(#grain)" opacity="0.12" style="mix-blend-mode:multiply"/>
+
+  <!-- Edge darkening -->
+  <rect width="800" height="140" fill="url(#edge-darken)"/>
+</svg>

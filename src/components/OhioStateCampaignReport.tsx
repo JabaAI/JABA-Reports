@@ -1,10 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ChevronDown, BarChart3, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronDown, BarChart3, Flame, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { PieChart, Pie, Cell } from 'recharts';
 import { format } from 'date-fns';
 import { OHIO_STATE } from '../data/schoolConfig';
 import groupedCampaigns from '../data/grouped_campaigns_multi_post_only.json';
 import ohioSponsoredRaw from '../data/ohio_sponsored.json';
 import ohioUnsponsoredRaw from '../data/ohio_unsponsored.json';
+import rosterContentsRaw from '../data/socialMedia.roster_contents (5).json';
 import { calculateCampaignEMV, formatEMV, PostEMVData } from '../utils/emvCalculator';
 
 interface OhioStateCampaignReportProps {
@@ -56,6 +58,7 @@ const sortedCampaigns = campaignGroups
   .sort((a, b) => b.postIds.length - a.postIds.length);
 const ohioSponsored = ohioSponsoredRaw as OhioPost[];
 const ohioUnsponsored = ohioUnsponsoredRaw as OhioPost[];
+const rosterContents = rosterContentsRaw as OhioPost[];
 const DEFAULT_CAMPAIGN_NAME = 'Fortnite - Caleb Downs x Carnell Tate';
 
 const formatCompactNumber = (value: number) => {
@@ -185,6 +188,22 @@ const formatSportLabel = (sport?: string) => {
     .join(' ');
 };
 
+const getPostMetricValue = (
+  post: OhioPost,
+  metric: 'likes' | 'comments' | 'engagementRate',
+  engagementRateByAthlete: Map<string, number>
+) => {
+  if (metric === 'likes') return post.metrics?.likes ?? 0;
+  if (metric === 'comments') return post.metrics?.comments ?? 0;
+  const rawRate = post.metrics?.engagementRate ?? 0;
+  if (rawRate > 0) return rawRate * 100;
+  const fallbackRates = getAthleteKeys(post)
+    .map((id) => engagementRateByAthlete.get(id))
+    .filter((rate): rate is number => typeof rate === 'number' && rate > 0);
+  if (fallbackRates.length === 0) return 0;
+  return (fallbackRates.reduce((sum, rate) => sum + rate, 0) / fallbackRates.length) * 100;
+};
+
 const getLiftPercent = (value: number, baseline: number) =>
   baseline > 0 ? ((value - baseline) / baseline) * 100 : 0;
 
@@ -196,6 +215,9 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   });
   const [topPostsMetric, setTopPostsMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
   const [benchmarkMetric, setBenchmarkMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
+  const [athleteBenchmarkMetric, setAthleteBenchmarkMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
+  const [perfMetric, setPerfMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
+  const [campaignLiftMetric, setCampaignLiftMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
 
   const selectedCampaignGroup = useMemo(() => {
     return (
@@ -226,20 +248,20 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   const unsponsoredByAthlete = useMemo(() => groupByAthlete(ohioUnsponsored), []);
 
   const athleteProfileMap = useMemo(() => {
-    const map = new Map<string, { name?: string; sport?: string }>();
-    const allPosts = [...ohioSponsored, ...ohioUnsponsored];
-    allPosts.forEach((post) => {
+    const map = new Map<string, { name?: string; sport?: string; image?: string }>();
+    const addProfile = (post: OhioPost) => {
       const id = post.athlete?._id;
       if (!id) return;
       const isCollab = (post.collaborationAthleteIds?.length ?? 0) > 1;
       if (isCollab) return;
-      if (!map.has(id)) {
-        map.set(id, {
-          name: post.athlete?.name,
-          sport: post.athlete?.sport,
-        });
-      }
-    });
+      const current = map.get(id) ?? {};
+      map.set(id, {
+        name: current.name ?? post.athlete?.name,
+        sport: current.sport ?? post.athlete?.sport,
+        image: current.image ?? post.athlete?.image,
+      });
+    };
+    [...rosterContents, ...ohioSponsored, ...ohioUnsponsored].forEach(addProfile);
     return map;
   }, []);
 
@@ -353,6 +375,18 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
         : 0;
       const allAvgLikes = allAthletePosts.length ? allStats.totalLikes / allAthletePosts.length : 0;
 
+      const campaignAvgComments = campaignAthletePosts.length
+        ? campaignStats.totalComments / campaignAthletePosts.length
+        : 0;
+      const sponsoredAvgComments = sponsoredAthletePosts.length
+        ? sponsoredStats.totalComments / sponsoredAthletePosts.length
+        : 0;
+      const allAvgComments = allAthletePosts.length ? allStats.totalComments / allAthletePosts.length : 0;
+
+      const campaignAvgEngagement = campaignStats.avgEngagementRate * 100;
+      const sponsoredAvgEngagement = sponsoredStats.avgEngagementRate * 100;
+      const allAvgEngagement = allStats.avgEngagementRate * 100;
+
       return {
         athleteId,
         name:
@@ -367,12 +401,24 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
           ?? unsponsoredAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.sport
           ?? campaignAthletePosts.find((post) => post.athlete?._id === athleteId)?.athlete?.sport
           ?? 'N/A',
-        campaignAvgLikes,
-        liftVsSponsored: getLiftPercent(campaignAvgLikes, sponsoredAvgLikes),
-        liftVsAll: getLiftPercent(campaignAvgLikes, allAvgLikes),
+        campaign: {
+          likes: campaignAvgLikes,
+          comments: campaignAvgComments,
+          engagementRate: campaignAvgEngagement,
+        },
+        sponsored: {
+          likes: sponsoredAvgLikes,
+          comments: sponsoredAvgComments,
+          engagementRate: sponsoredAvgEngagement,
+        },
+        all: {
+          likes: allAvgLikes,
+          comments: allAvgComments,
+          engagementRate: allAvgEngagement,
+        },
       };
-    }).sort((a, b) => b.campaignAvgLikes - a.campaignAvgLikes);
-  }, [campaignAthleteIds, campaignPosts, sponsoredByAthlete, unsponsoredByAthlete]);
+    }).sort((a, b) => b.campaign.likes - a.campaign.likes);
+  }, [campaignAthleteIds, campaignPosts, sponsoredByAthlete, unsponsoredByAthlete, athleteProfileMap, engagementRateByAthlete]);
 
   const commentLikeRatio = campaignSummary.totalLikes > 0
     ? (campaignSummary.totalComments / campaignSummary.totalLikes) * 100
@@ -389,39 +435,25 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
     container.scrollBy({ left: delta, behavior: 'smooth' });
   };
 
-  const engagementMix = useMemo(() => {
-    const likes = campaignSummary.totalLikes;
-    const comments = campaignSummary.totalComments;
-    const total = likes + comments;
-    return {
-      likes,
-      comments,
-      total,
-      likesPct: total > 0 ? (likes / total) * 100 : 0,
-      commentsPct: total > 0 ? (comments / total) * 100 : 0,
-    };
-  }, [campaignSummary.totalLikes, campaignSummary.totalComments]);
+  const perfData = useMemo(() => {
+    const cLikes = campaignSummary.postCount ? campaignSummary.totalLikes / campaignSummary.postCount : 0;
+    const sLikes = sponsoredSummary.postCount ? sponsoredSummary.totalLikes / sponsoredSummary.postCount : 0;
+    const cComments = campaignSummary.postCount ? campaignSummary.totalComments / campaignSummary.postCount : 0;
+    const sComments = sponsoredSummary.postCount ? sponsoredSummary.totalComments / sponsoredSummary.postCount : 0;
+    const cRate = campaignSummary.avgEngagementRate * 100;
+    const sRate = sponsoredSummary.avgEngagementRate * 100;
 
-  const donutRadius = 52;
-  const donutCircumference = 2 * Math.PI * donutRadius;
-  const donutGradientId = 'osu-likes-gradient';
-  const donutSegments = [
-    {
-      label: 'Likes',
-      value: engagementMix.likes,
-      pct: engagementMix.likesPct,
-      stroke: `url(#${donutGradientId})`,
-      dot: '#BB0000'
-    },
-    {
-      label: 'Comments',
-      value: engagementMix.comments,
-      pct: engagementMix.commentsPct,
-      stroke: '#F2B9B9',
-      dot: '#F2B9B9'
-    },
-  ];
-  let donutOffset = 0;
+    const vals = perfMetric === 'comments'
+      ? { campaign: cComments, sponsored: sComments, label: 'Avg Comments' }
+      : perfMetric === 'engagementRate'
+        ? { campaign: cRate, sponsored: sRate, label: 'Eng. Rate' }
+        : { campaign: cLikes, sponsored: sLikes, label: 'Avg Likes' };
+
+    const index = vals.sponsored > 0 ? (vals.campaign / vals.sponsored) * 100 : 0;
+    const lift = vals.sponsored > 0 ? ((vals.campaign - vals.sponsored) / vals.sponsored) * 100 : 0;
+
+    return { ...vals, index, lift };
+  }, [perfMetric, campaignSummary, sponsoredSummary]);
 
   const benchmarkCard = useMemo(() => {
     if (benchmarkMetric === 'comments') {
@@ -465,12 +497,109 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
     allSummary.avgEngagementRate,
   ]);
 
+  const athleteMetricConfig = useMemo(() => {
+    if (athleteBenchmarkMetric === 'comments') {
+      return {
+        label: 'Avg Comments',
+        format: (value: number) => formatCompactNumber(value),
+      };
+    }
+    if (athleteBenchmarkMetric === 'engagementRate') {
+      return {
+        label: 'Avg Eng. Rate',
+        format: (value: number) => `${value.toFixed(1)}%`,
+      };
+    }
+    return {
+      label: 'Avg Likes',
+      format: (value: number) => formatCompactNumber(value),
+    };
+  }, [athleteBenchmarkMetric]);
+
+  const campaignLiftMetricConfig = useMemo(() => {
+    if (campaignLiftMetric === 'comments') {
+      return {
+        label: 'Comments',
+        formatValue: (value: number) => formatCompactNumber(value),
+      };
+    }
+    if (campaignLiftMetric === 'engagementRate') {
+      return {
+        label: 'Eng. Rate',
+        formatValue: (value: number) => `${value.toFixed(1)}%`,
+      };
+    }
+    return {
+      label: 'Likes',
+      formatValue: (value: number) => formatCompactNumber(value),
+    };
+  }, [campaignLiftMetric]);
+
+  const campaignLiftCards = useMemo(() => {
+    return athleteBenchmarks
+      .map((athlete) => {
+        const campaignValue = athlete.campaign[campaignLiftMetric];
+        const baselineValue = athlete.all[campaignLiftMetric];
+        return {
+          ...athlete,
+          campaignValue,
+          baselineValue,
+          liftValue: campaignValue - baselineValue,
+        };
+      })
+      .sort((a, b) => b.liftValue - a.liftValue)
+      .slice(0, 3);
+  }, [athleteBenchmarks, campaignLiftMetric]);
+
+  const performanceDistribution = useMemo(() => {
+    const values = ohioSponsored.map((post) =>
+      getPostMetricValue(post, benchmarkMetric, engagementRateByAthlete)
+    );
+    if (values.length === 0) {
+      return {
+        worst: 0,
+        median: 0,
+        best: 0,
+        percentileTop: 0,
+        position: 0,
+        total: 0,
+      };
+    }
+    const sorted = [...values].sort((a, b) => a - b);
+    const worst = sorted[0];
+    const best = sorted[sorted.length - 1];
+    const median = sorted[Math.floor(sorted.length / 2)];
+    const percentileValue = (p: number) => {
+      const index = Math.max(0, Math.min(sorted.length - 1, Math.floor((p / 100) * (sorted.length - 1))));
+      return sorted[index];
+    };
+    const p5 = percentileValue(5);
+    const p95 = percentileValue(95);
+    const scaleMin = Math.min(p5, median);
+    const scaleMax = Math.max(p95, scaleMin + 1);
+    const campaignAvg = benchmarkCard.campaignValue;
+    const countBelow = sorted.filter((value) => value <= campaignAvg).length;
+    const percentile = (countBelow / sorted.length) * 100;
+    const percentileTop = Math.max(1, Math.round(100 - percentile));
+    const position = scaleMax > scaleMin
+      ? Math.min(100, Math.max(0, ((campaignAvg - scaleMin) / (scaleMax - scaleMin)) * 100))
+      : 0;
+
+    return {
+      worst,
+      median,
+      best,
+      percentileTop,
+      position,
+      total: sorted.length,
+    };
+  }, [ohioSponsored, benchmarkMetric, benchmarkCard.campaignValue, engagementRateByAthlete]);
+
   return (
     <div className="min-h-screen bg-[#070708] text-white osu-report">
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(187,0,0,0.25),_transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,_rgba(255,255,255,0.08),_transparent_45%)]" />
-
         <div className="relative z-10 border-b border-white/10 backdrop-blur-xl bg-black/40">
           <div className="max-w-[1600px] mx-auto px-6 py-6 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
@@ -527,7 +656,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
               <label className="text-xs uppercase tracking-[0.35em] text-white/60">Campaigns</label>
               <div className="relative mt-2">
                 <select
-                  className="w-full appearance-none bg-black/50 border border-white/15 rounded-xl px-4 py-3 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-[#BB0000]/60"
+                  className="w-full appearance-none bg-black/50 border border-white/15 rounded-sm px-4 py-3 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-[#BB0000]/60"
                   value={selectedCampaign}
                   onChange={(event) => setSelectedCampaign(event.target.value)}
                 >
@@ -542,124 +671,131 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            {[
-              { label: 'Athletes', value: campaignSummary.uniqueAthletes.toLocaleString() },
-              { label: '# of Posts', value: campaignSummary.postCount.toLocaleString() },
-              { label: 'EMV', value: formatEMV(campaignEmv.totalEMV) },
-              { label: 'Average EMV', value: formatEMV(campaignEmv.avgEMVPerPost) },
-            ].map((metric) => (
-              <div
-                key={metric.label}
-                className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
-              >
-                <p className="text-xs text-white/60 uppercase tracking-[0.35em]">{metric.label}</p>
-                <p className="text-3xl font-semibold mt-3">{metric.value}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_2fr] gap-6">
+            <div className="osu-paint-card osu-keep-white p-10 flex items-center">
+              <div className="flex-1">
+                <p className="text-sm uppercase tracking-[0.35em] font-semibold">Total Engagements</p>
+                <p className="text-5xl font-bold mt-3">{formatCompactNumber(campaignSummary.totalEngagements)}</p>
+                <p className="text-sm mt-2 text-white/80">Driven by campaign highlights.</p>
               </div>
-            ))}
-          </div>
+              <div className="w-px h-20 bg-white/30 mx-8" />
+              <div className="flex-1">
+                <p className="text-sm uppercase tracking-[0.35em] font-semibold">Earned Media Value</p>
+                <p className="text-5xl font-bold mt-3">{formatEMV(campaignEmv.totalEMV)}</p>
+                <p className="text-sm mt-2 text-white/80">Campaign EMV total.</p>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            {[
-              { label: 'Total Engagements', value: formatCompactNumber(campaignSummary.totalEngagements) },
-              { label: 'Likes', value: formatCompactNumber(campaignSummary.totalLikes) },
-              { label: 'Comments', value: formatCompactNumber(campaignSummary.totalComments) },
-              { label: 'Comment to Like Ratio', value: `${commentLikeRatio.toFixed(2)}%` },
-            ].map((metric) => (
-              <div
-                key={metric.label}
-                className="bg-black/50 border border-white/10 rounded-2xl p-6"
-              >
-                <p className="text-xs text-white/60 uppercase tracking-[0.35em]">{metric.label}</p>
-                <p className="text-2xl font-semibold mt-3">{metric.value}</p>
-              </div>
-            ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {[
+                { label: 'Athletes', value: campaignSummary.uniqueAthletes.toLocaleString() },
+                { label: '# of Posts', value: campaignSummary.postCount.toLocaleString() },
+                { label: 'Average EMV', value: formatEMV(campaignEmv.avgEMVPerPost) },
+                { label: 'Likes', value: formatCompactNumber(campaignSummary.totalLikes) },
+                { label: 'Comments', value: formatCompactNumber(campaignSummary.totalComments) },
+                { label: 'Comment to Like Ratio', value: `${commentLikeRatio.toFixed(2)}%` },
+              ].map((metric) => (
+                <div
+                  key={metric.label}
+                  className="bg-black/50 border border-white/10 rounded-sm p-6"
+                >
+                  <p className="text-sm text-white/60 uppercase tracking-[0.35em] font-semibold">{metric.label}</p>
+                  <p className="text-4xl font-bold mt-3">{metric.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.4fr] gap-6">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col h-[320px]">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-white/60">Engagement Mix</p>
-                <h3 className="osu-display text-2xl mt-2">Likes vs Comments</h3>
-                <p className="text-white/60 text-sm mt-1">Breakdown of campaign engagement sources.</p>
-              </div>
-              <div className="flex items-center justify-center flex-1">
-                <div className="flex items-center justify-center gap-8 w-full max-w-[520px]">
-                  <div className="relative w-44 h-44">
-                  <svg viewBox="0 0 140 140" className="w-full h-full">
-                    <defs>
-                      <linearGradient id={donutGradientId} x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#BB0000" />
-                        <stop offset="100%" stopColor="#5A0000" />
-                      </linearGradient>
-                      <filter id="osu-donut-glow">
-                        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="rgba(255,255,255,0.25)" />
-                      </filter>
-                    </defs>
-                    <circle
-                      cx="70"
-                      cy="70"
-                      r={donutRadius}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.08)"
-                      strokeWidth="14"
-                    />
-                    <circle
-                      cx="70"
-                      cy="70"
-                      r={donutRadius - 18}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.15)"
-                      strokeWidth="1"
-                      filter="url(#osu-donut-glow)"
-                    />
-                    {donutSegments.map((segment) => {
-                      const segmentLength = (segment.pct / 100) * donutCircumference;
-                      const strokeDasharray = `${segmentLength} ${donutCircumference - segmentLength}`;
-                      const strokeDashoffset = -donutOffset;
-                      donutOffset += segmentLength;
-                      return (
-                        <circle
-                          key={segment.label}
-                          cx="70"
-                          cy="70"
-                          r={donutRadius}
-                          fill="none"
-                          stroke={segment.stroke}
-                          strokeWidth="14"
-                          strokeDasharray={strokeDasharray}
-                          strokeDashoffset={strokeDashoffset}
-                          strokeLinecap="round"
-                          transform="rotate(-90 70 70)"
-                        />
-                      );
-                    })}
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <div className="text-2xl font-semibold">{formatCompactNumber(engagementMix.total)}</div>
-                    <div className="text-xs uppercase tracking-[0.3em] text-white/60">Total</div>
-                  </div>
-                  </div>
-                  <div className="w-full max-w-[220px] space-y-3 text-sm">
-                  {donutSegments.map((segment) => (
-                    <div key={segment.label} className="flex items-center justify-between gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2">
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: segment.dot }}
-                        />
-                        <div className="text-white/80 text-xs uppercase tracking-[0.2em]">{segment.label}</div>
-                      </div>
-                      <div className="text-white font-semibold text-sm">
-                        {formatCompactNumber(segment.value)} • {segment.pct.toFixed(1)}%
-                      </div>
-                    </div>
-                  ))}
-                  </div>
+            <div className="bg-white/5 border border-white/10 rounded-sm p-6 flex flex-col h-[320px]">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.35em] font-semibold">Campaign Performance</p>
+                  <h3 className="osu-display text-2xl mt-1">vs Benchmark</h3>
+                </div>
+                <div className="relative">
+                  <select
+                    value={perfMetric}
+                    onChange={(e) => setPerfMetric(e.target.value as 'likes' | 'comments' | 'engagementRate')}
+                    className="appearance-none bg-white/10 border border-white/15 rounded-sm px-3 py-1.5 pr-8 text-xs uppercase tracking-[0.2em] font-semibold focus:outline-none focus:ring-1 focus:ring-[#BB0000]/60 cursor-pointer"
+                  >
+                    <option value="likes">Likes</option>
+                    <option value="comments">Comments</option>
+                    <option value="engagementRate">Eng. Rate</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
                 </div>
               </div>
+              <div className="flex-1 flex flex-col items-center justify-center -mt-2">
+                {(() => {
+                  const maxScale = Math.max(200, Math.ceil(perfData.index / 50) * 50 + 50);
+                  const clampedIndex = Math.max(0, Math.min(perfData.index, maxScale));
+                  const gaugeData = [
+                    { value: clampedIndex },
+                    { value: maxScale - clampedIndex },
+                  ];
+                  const gCx = 150;
+                  const gCy = 110;
+                  const innerR = 60;
+                  const outerR = 82;
+                  const baselineAngleDeg = 180 - (100 / maxScale) * 180;
+                  const baselineRad = (baselineAngleDeg * Math.PI) / 180;
+                  const mX1 = gCx + (innerR - 4) * Math.cos(baselineRad);
+                  const mY1 = gCy - (innerR - 4) * Math.sin(baselineRad);
+                  const mX2 = gCx + (outerR + 4) * Math.cos(baselineRad);
+                  const mY2 = gCy - (outerR + 4) * Math.sin(baselineRad);
+                  const lblR = outerR + 30;
+                  const lblX = gCx + lblR * Math.cos(baselineRad);
+                  const lblY = gCy - lblR * Math.sin(baselineRad);
+                  const liftText = `${perfData.lift >= 0 ? '+' : ''}${perfData.lift.toFixed(0)}%`;
+                  const liftFontSize = liftText.length >= 6 ? 24 : liftText.length >= 5 ? 28 : 32;
+                  const liftFontVw = liftText.length >= 6 ? 2.6 : liftText.length >= 5 ? 3 : 3.4;
+                  const liftFontClamp = `clamp(20px, ${liftFontVw}vw, ${liftFontSize}px)`;
+                  return (
+                    <div className="relative w-full max-w-[320px] mx-auto" style={{ height: 150 }}>
+                      <PieChart width={320} height={150}>
+                        <Pie
+                          data={gaugeData}
+                          cx={gCx + 10}
+                          cy={gCy}
+                          startAngle={180}
+                          endAngle={0}
+                          innerRadius={innerR}
+                          outerRadius={outerR}
+                          dataKey="value"
+                          stroke="none"
+                          cornerRadius={3}
+                          isAnimationActive={false}
+                        >
+                          <Cell fill="#BB0000" />
+                          <Cell fill="#3b342f" />
+                        </Pie>
+                      </PieChart>
+                      <svg style={{ position: 'absolute', top: 0, left: 0, width: 320, height: 150, pointerEvents: 'none', zIndex: 10 }}>
+                        <line x1={mX1 + 10} y1={mY1} x2={mX2 + 10} y2={mY2} stroke="#ffffff" strokeWidth={2.5} />
+                        <text x={lblX + 10} y={lblY - 6} textAnchor="middle" fontSize="7" fill="#6a615a" fontWeight="700" fontFamily="var(--font-body)">100%</text>
+                      </svg>
+                      <div style={{ position: 'absolute', top: 38, left: 0, width: 320, height: 104, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10 }}>
+                        <span style={{ fontSize: liftFontClamp, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#BB0000', lineHeight: 1 }}>
+                          {liftText}
+                        </span>
+                        <span style={{ fontSize: 'clamp(7px, 1.3vw, 8px)', color: '#6a615a', letterSpacing: '0.3em', fontFamily: 'var(--font-body)', marginTop: 6 }}>
+                          PERFORMANCE INDEX
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+                <div className="w-full max-w-[360px] border-t pt-2 flex items-center justify-between -mt-1" style={{ borderColor: 'rgba(0,0,0,0.15)' }}>
+                  <span className="text-xs font-bold">Sponsored Avg = 100</span>
+                  <span className="text-lg font-bold osu-display">{perfData.index.toFixed(0)}%</span>
+                </div>
+                <p className="text-xs mt-1" style={{ color: '#6a615a' }}>
+                  Based on {sponsoredSummary.postCount} sponsored posts · {perfData.label}
+                </p>
+              </div>
             </div>
-            <div className="bg-black/50 border border-white/10 rounded-2xl p-6 flex flex-col h-[320px]">
+            <div className="bg-black/50 border border-white/10 rounded-sm p-6 flex flex-col h-[320px]">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <h3 className="osu-display text-2xl mb-2">{topPostsMetricConfig.title}</h3>
@@ -679,7 +815,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                       onClick={() => setTopPostsMetric(option.id)}
                       className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
                         topPostsMetric === option.id
-                          ? 'bg-[#BB0000] text-white'
+                          ? 'bg-[#BB0000] text-white osu-keep-white'
                           : 'text-white/60 hover:text-white'
                       }`}
                     >
@@ -707,9 +843,9 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                         </span>
                         <span>{topPostsMetricConfig.formatValue(value)}</span>
                       </div>
-                      <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-3.5 rounded-full bg-white/10 overflow-hidden">
                         <div
-                          className="h-full bg-[#BB0000]"
+                          className="h-full bg-[#BB0000] rounded-full"
                           style={{ width: `${(value / maxValue) * 100}%` }}
                         />
                       </div>
@@ -734,7 +870,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
           </div>
 
           {sortedCampaignPosts.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-white/60">
+            <div className="bg-white/5 border border-white/10 rounded-sm p-8 text-white/60">
               No sponsored posts found for this campaign yet.
             </div>
           ) : (
@@ -743,7 +879,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 <button
                   type="button"
                   onClick={() => scrollTopPostsCarousel('left')}
-                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center osu-keep-white"
                   aria-label="Scroll posts left"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -751,7 +887,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 <button
                   type="button"
                   onClick={() => scrollTopPostsCarousel('right')}
-                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center osu-keep-white"
                   aria-label="Scroll posts right"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -768,7 +904,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                     target={post.permalink ? '_blank' : undefined}
                     rel="noreferrer"
                     data-carousel-card="true"
-                    className="group min-w-[280px] md:min-w-[320px] lg:min-w-[360px] snap-start bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-[#BB0000]/60 transition-colors"
+                    className="group min-w-[280px] md:min-w-[320px] lg:min-w-[360px] snap-start bg-white/5 border border-white/10 rounded-sm overflow-hidden hover:border-[#BB0000]/60 transition-colors"
                   >
                     <div className="relative aspect-[4/5] bg-black/60">
                       {post.url && (
@@ -780,7 +916,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                         />
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
-                      <div className="absolute top-4 left-4 flex items-center gap-2">
+                      <div className="absolute top-4 left-4 flex items-center gap-2 osu-keep-white">
                         <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
                           {post.source ?? 'SOCIAL'}
                         </span>
@@ -788,10 +924,10 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                           {post.mediaType ?? 'POST'}
                         </span>
                       </div>
-                      <div className="absolute top-4 right-4 h-10 w-10 rounded-full bg-[#BB0000] flex items-center justify-center text-white font-bold">
+                      <div className="absolute top-4 right-4 h-10 w-10 rounded-full bg-[#BB0000] flex items-center justify-center text-white font-bold osu-keep-white">
                         #{index + 1}
                       </div>
-                      <div className="absolute bottom-4 left-4 right-4">
+                      <div className="absolute bottom-4 left-4 right-4 osu-keep-white">
                         <p className="text-white text-lg font-semibold line-clamp-2">
                           {post.athlete?.name ?? 'Ohio State Athlete'}
                         </p>
@@ -848,17 +984,54 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 posts: allSummary.postCount,
               },
             ].map((item) => (
-              <div key={item.label} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <p className="text-xs uppercase tracking-[0.35em] text-white/60">{item.label}</p>
-                <p className="text-lg font-semibold mt-2">{item.posts.toLocaleString()} posts</p>
-                <p className="text-white/60 text-sm mt-1">{item.description}</p>
+              <div key={item.label} className="bg-white/5 border border-white/10 rounded-sm p-6">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/60 font-semibold">{item.label}</p>
+                <p className="text-3xl font-bold mt-2">{item.posts.toLocaleString()} posts</p>
+                <p className="text-white/60 text-base mt-1">{item.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div className="bg-white/5 border border-white/10 rounded-sm p-6">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.35em] font-semibold">Performance Distribution</p>
+                <h3 className="osu-display text-2xl mt-1">{benchmarkCard.title}</h3>
+              </div>
+              <div className="text-sm font-semibold">
+                {performanceDistribution.total > 0
+                  ? `This campaign: Top ${performanceDistribution.percentileTop}% of sponsored posts`
+                  : 'No sponsored baseline available'}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="relative h-4 rounded-full" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>
+                <div className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(90deg, #d7cfc6, #b8a48c)' }} />
+                <div
+                  className="absolute flex flex-col items-center"
+                  style={{ left: `${performanceDistribution.position}%`, transform: 'translateX(-50%)', top: -26 }}
+                >
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#6a615a' }}>This Campaign</span>
+                  <div className="w-1 h-10 bg-[#BB0000] rounded-full mt-1" />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm font-semibold">
+              <div>Worst: {benchmarkCard.formatter(performanceDistribution.worst)}</div>
+              <div>Median: {benchmarkCard.formatter(performanceDistribution.median)}</div>
+              <div>Best: {benchmarkCard.formatter(performanceDistribution.best)}</div>
+            </div>
+
+            <p className="text-xs mt-3 text-white/60">
+              Based on {performanceDistribution.total} sponsored posts · {benchmarkCard.title}
+            </p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-sm p-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <h3 className="osu-display text-xl tracking-wide">{benchmarkCard.title}</h3>
+              <h3 className="osu-display text-3xl tracking-wide">{benchmarkCard.title}</h3>
               <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
                 {([
                   { id: 'likes', label: 'Likes' },
@@ -871,7 +1044,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                     onClick={() => setBenchmarkMetric(option.id)}
                     className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
                       benchmarkMetric === option.id
-                        ? 'bg-[#BB0000] text-white'
+                        ? 'bg-[#BB0000] text-white osu-keep-white'
                         : 'text-white/60 hover:text-white'
                     }`}
                   >
@@ -895,31 +1068,31 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 <>
                   <div className="mt-4">
                     {[
-                      { label: 'Campaign', value: benchmarkCard.campaignValue, tone: 'bg-[#BB0000]' },
-                      { label: 'Sponsored', value: benchmarkCard.sponsoredValue, tone: 'bg-white/30' },
-                      { label: 'All posts', value: benchmarkCard.allValue, tone: 'bg-white/15' },
+                      { label: 'Campaign', value: benchmarkCard.campaignValue, color: '#BB0000' },
+                      { label: 'Sponsored', value: benchmarkCard.sponsoredValue, color: '#8b7355' },
+                      { label: 'All posts', value: benchmarkCard.allValue, color: '#b8a48c' },
                     ].map((row) => (
-                      <div key={row.label} className="flex items-center gap-4 mb-3">
-                        <div className="w-40 text-xs text-white/70">{row.label}</div>
-                        <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div key={row.label} className="flex items-center gap-4 mb-5">
+                        <div className="w-44 text-sm font-bold uppercase tracking-[0.2em]">{row.label}</div>
+                        <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
                           <div
-                            className={`h-full ${row.tone}`}
-                            style={{ width: `${(row.value / maxValue) * 100}%` }}
+                            className="h-full rounded-full"
+                            style={{ width: `${(row.value / maxValue) * 100}%`, backgroundColor: row.color }}
                           />
                         </div>
-                        <div className="w-16 text-right text-sm font-semibold">
+                        <div className="w-24 text-right text-xl font-bold">
                           {benchmarkCard.formatter(row.value)}
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 text-xs text-white/70 uppercase tracking-[0.28em]">Lift</div>
-                  <div className="flex flex-wrap gap-3 mt-2 text-sm">
-                    <span className="px-3 py-1 rounded-full bg-[#BB0000]/20 text-[#FFB3B3]">
+                  <div className="mt-6 text-sm font-bold uppercase tracking-[0.3em]">Lift</div>
+                  <div className="flex flex-wrap gap-3 mt-3 text-base font-bold">
+                    <span className="px-5 py-2 rounded-full" style={{ backgroundColor: '#BB0000', color: '#ffffff' }}>
                       {liftVsAll >= 0 ? '+' : ''}
                       {liftVsAll.toFixed(1)}% vs all posts
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-white/10 text-white/70">
+                    <span className="px-5 py-2 rounded-full" style={{ backgroundColor: '#3b342f', color: '#ffffff' }}>
                       {liftVsSponsored >= 0 ? '+' : ''}
                       {liftVsSponsored.toFixed(1)}% vs sponsored
                     </span>
@@ -929,38 +1102,152 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             })()}
           </div>
 
-          <div className="bg-black/50 border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white/5 border border-white/10 rounded-sm p-8">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h3 className="osu-display text-xl tracking-wide">Individual Athlete Benchmarks</h3>
-                <p className="text-white/60 text-sm">Top athletes from this campaign and their lift vs baselines.</p>
+                <h3 className="osu-display text-3xl tracking-wide">Campaign Lift vs Typical Posts</h3>
+                <p className="text-white/60 text-sm mt-1">Baseline: athlete average across all posts.</p>
+              </div>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+                {([
+                  { id: 'likes', label: 'Likes' },
+                  { id: 'comments', label: 'Comments' },
+                  { id: 'engagementRate', label: 'Eng. Rate' },
+                ] as const).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setCampaignLiftMetric(option.id)}
+                    className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
+                      campaignLiftMetric === option.id
+                        ? 'bg-[#BB0000] text-white osu-keep-white'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
-              {athleteBenchmarks.map((athlete) => (
-                <div
-                  key={athlete.athleteId}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3"
-                >
-                  <div>
-                    <div className="text-sm font-semibold text-white">{athlete.name}</div>
-                    <div className="text-xs text-white/60">{formatSportLabel(athlete.sport)}</div>
+
+            <div
+              className="mt-6 grid gap-4"
+              style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}
+            >
+              {campaignLiftCards.map((athlete) => {
+                const liftSign = athlete.liftValue >= 0 ? '+' : '-';
+                const liftDisplay = `${liftSign}${campaignLiftMetricConfig.formatValue(Math.abs(athlete.liftValue))}`;
+                const athleteImage = athleteProfileMap.get(athlete.athleteId)?.image;
+                return (
+                  <div
+                    key={athlete.athleteId}
+                    className="bg-white/5 border border-white/10 rounded-sm overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.08)]"
+                  >
+                    <div className="osu-paint-card px-4 py-4 flex items-center gap-4 osu-keep-white">
+                      <div className="h-12 w-12 rounded-full bg-white/15 flex items-center justify-center overflow-hidden">
+                        {athleteImage ? (
+                          <img
+                            src={athleteImage}
+                            alt={athlete.name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <User className="w-6 h-6" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold">
+                          {liftDisplay} {campaignLiftMetricConfig.label}
+                        </div>
+                        <div className="text-xs uppercase tracking-[0.2em] text-white/80">
+                          vs their average post
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <div className="text-sm font-semibold">{athlete.name}</div>
+                      <div className="text-xs text-white/60">{formatSportLabel(athlete.sport)}</div>
+                      <div className="mt-3 text-sm text-white/70 flex items-center gap-2">
+                        <span className="font-semibold">
+                          Campaign: {campaignLiftMetricConfig.formatValue(athlete.campaignValue)}
+                        </span>
+                        <span className="text-white/40">•</span>
+                        <span>
+                          Avg: {campaignLiftMetricConfig.formatValue(athlete.baselineValue)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-white/70">
-                    <span className="px-3 py-1 rounded-full bg-white/10">
-                      Avg Likes {formatCompactNumber(athlete.campaignAvgLikes)}
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-[#BB0000]/20 text-[#FFB3B3]">
-                      {athlete.liftVsAll >= 0 ? '+' : ''}
-                      {athlete.liftVsAll.toFixed(1)}% vs all posts
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-white/10">
-                      {athlete.liftVsSponsored >= 0 ? '+' : ''}
-                      {athlete.liftVsSponsored.toFixed(1)}% vs sponsored
-                    </span>
+                );
+              })}
+            </div>
+
+            {campaignLiftCards.length === 0 && (
+              <div className="mt-4 text-white/60 text-sm">No athlete baselines available for this campaign.</div>
+            )}
+          </div>
+
+          <div className="bg-black/50 border border-white/10 rounded-sm p-8">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+              <div>
+                <h3 className="osu-display text-3xl tracking-wide">Individual Athlete Benchmarks</h3>
+                <p className="text-white/60 text-base mt-1">Top athletes from this campaign and their lift vs baselines.</p>
+              </div>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+                {([
+                  { id: 'likes', label: 'Likes' },
+                  { id: 'comments', label: 'Comments' },
+                  { id: 'engagementRate', label: 'Eng. Rate' },
+                ] as const).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setAthleteBenchmarkMetric(option.id)}
+                    className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
+                      athleteBenchmarkMetric === option.id
+                        ? 'bg-[#BB0000] text-white osu-keep-white'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-3 max-h-[520px] overflow-y-auto pr-2">
+              {athleteBenchmarks.map((athlete) => {
+                const campaignValue = athlete.campaign[athleteBenchmarkMetric];
+                const sponsoredValue = athlete.sponsored[athleteBenchmarkMetric];
+                const allValue = athlete.all[athleteBenchmarkMetric];
+                const liftVsAll = getLiftPercent(campaignValue, allValue);
+                const liftVsSponsored = getLiftPercent(campaignValue, sponsoredValue);
+
+                return (
+                  <div
+                    key={athlete.athleteId}
+                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white/5 border border-white/10 rounded-sm px-6 py-4"
+                  >
+                    <div>
+                      <div className="text-base font-bold">{athlete.name}</div>
+                      <div className="text-sm text-white/60">{formatSportLabel(athlete.sport)}</div>
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-sm uppercase tracking-[0.15em] font-semibold">
+                      <span className="px-4 py-1.5 rounded-full bg-white/10">
+                        {athleteMetricConfig.label} {athleteMetricConfig.format(campaignValue)}
+                      </span>
+                      <span className="px-4 py-1.5 rounded-full" style={{ backgroundColor: '#BB0000', color: '#ffffff' }}>
+                        {liftVsAll >= 0 ? '+' : ''}
+                        {liftVsAll.toFixed(1)}% vs all posts
+                      </span>
+                      <span className="px-4 py-1.5 rounded-full" style={{ backgroundColor: '#3b342f', color: '#ffffff' }}>
+                        {liftVsSponsored >= 0 ? '+' : ''}
+                        {liftVsSponsored.toFixed(1)}% vs sponsored
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {athleteBenchmarks.length === 0 && (
                 <div className="text-white/60 text-sm">No benchmark data available for this campaign.</div>
               )}
