@@ -208,7 +208,6 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
       .sort((a, b) => (b.metrics?.likes ?? 0) - (a.metrics?.likes ?? 0));
   }, [campaignPosts]);
 
-  const topPosts = useMemo(() => sortedCampaignPosts.slice(0, 4), [sortedCampaignPosts]);
 
   const topPostsMetricConfig = useMemo(() => {
     if (topPostsMetric === 'comments') {
