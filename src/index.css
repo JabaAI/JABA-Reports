@@ -8,13 +8,13 @@
 
 .osu-report {
   font-family: var(--font-body);
-  background-color: #f7f4ef;
+  background-color: #f3f3f3;
   color: #2b2321;
 }
 
 .osu-display {
   font-family: var(--font-display);
-  color: #BB0000;
+  color: #BA0C2F;
 }
 
 @keyframes rise {
@@ -30,7 +30,7 @@
 
 .osu-report .osu-paint-card {
   position: relative;
-  background-color: #b10f17;
+  background-color: #BA0C2F;
   background-image:
     linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0)),
     radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2), transparent 45%),
@@ -67,31 +67,31 @@
 }
 
 .osu-report .bg-white\/5 {
-  background-color: #fffdf9 !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .bg-white\/10 {
-  background-color: #f3eee7 !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .bg-white\/15 {
-  background-color: #ede6de !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .bg-white\/20 {
-  background-color: #e7dfd4 !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .bg-white\/30 {
-  background-color: #dfd6cb !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .bg-black\/50 {
-  background-color: #fffdf9 !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .bg-black\/40 {
-  background-color: #fffdf9 !important;
+  background-color: #ffffff !important;
 }
 
 .osu-report .border-white\/10 {

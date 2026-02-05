@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ChevronDown, BarChart3, Flame, ChevronLeft, ChevronRight, User } from 'lucide-react';
-import { PieChart, Pie, Cell } from 'recharts';
+import { useMemo, useState } from 'react';
+import { ArrowLeft, ChevronDown, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { OHIO_STATE } from '../data/schoolConfig';
 import groupedCampaigns from '../data/grouped_campaigns_multi_post_only.json';
@@ -188,22 +187,6 @@ const formatSportLabel = (sport?: string) => {
     .join(' ');
 };
 
-const getPostMetricValue = (
-  post: OhioPost,
-  metric: 'likes' | 'comments' | 'engagementRate',
-  engagementRateByAthlete: Map<string, number>
-) => {
-  if (metric === 'likes') return post.metrics?.likes ?? 0;
-  if (metric === 'comments') return post.metrics?.comments ?? 0;
-  const rawRate = post.metrics?.engagementRate ?? 0;
-  if (rawRate > 0) return rawRate * 100;
-  const fallbackRates = getAthleteKeys(post)
-    .map((id) => engagementRateByAthlete.get(id))
-    .filter((rate): rate is number => typeof rate === 'number' && rate > 0);
-  if (fallbackRates.length === 0) return 0;
-  return (fallbackRates.reduce((sum, rate) => sum + rate, 0) / fallbackRates.length) * 100;
-};
-
 const getLiftPercent = (value: number, baseline: number) =>
   baseline > 0 ? ((value - baseline) / baseline) * 100 : 0;
 
@@ -213,7 +196,6 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
     const match = sortedCampaigns.find((campaign) => campaign.campaignName === DEFAULT_CAMPAIGN_NAME);
     return match?.campaignName ?? sortedCampaigns[0]?.campaignName ?? '';
   });
-  const [topPostsMetric, setTopPostsMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
   const [benchmarkMetric, setBenchmarkMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
   const [athleteBenchmarkMetric, setAthleteBenchmarkMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
   const [perfMetric, setPerfMetric] = useState<'likes' | 'comments' | 'engagementRate'>('likes');
@@ -320,42 +302,6 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   }, [campaignPosts]);
 
 
-  const topPostsMetricConfig = useMemo(() => {
-    if (topPostsMetric === 'comments') {
-      return {
-        title: 'Top Posts - Comments',
-        description: 'Horizontal ranking of the top campaign posts by comments.',
-        getValue: (post: OhioPost) => post.metrics?.comments ?? 0,
-        formatValue: (value: number) => formatCompactNumber(value),
-      };
-    }
-    if (topPostsMetric === 'engagementRate') {
-      return {
-        title: 'Top Posts - Engagement Rate',
-        description: 'Horizontal ranking of the top campaign posts by engagement rate.',
-        getValue: (post: OhioPost) => {
-          const raw = post.metrics?.engagementRate ?? 0;
-          if (raw > 0) return raw * 100;
-          const fallbackRates = getAthleteKeys(post)
-            .map((id) => engagementRateByAthlete.get(id))
-            .filter((rate): rate is number => typeof rate === 'number' && rate > 0);
-          if (fallbackRates.length === 0) return 0;
-          const avg = fallbackRates.reduce((sum, rate) => sum + rate, 0) / fallbackRates.length;
-          return avg * 100;
-        },
-        formatValue: (value: number) => `${value.toFixed(1)}%`,
-      };
-    }
-    return {
-      title: 'Top Posts - Likes',
-      description: 'Horizontal ranking of the top campaign posts by likes.',
-      getValue: (post: OhioPost) => post.metrics?.likes ?? 0,
-      formatValue: (value: number) => formatCompactNumber(value),
-    };
-  }, [topPostsMetric, engagementRateByAthlete]);
-
-  const topPostsBarRows = useMemo(() => sortedCampaignPosts, [sortedCampaignPosts]);
-
   const athleteBenchmarks = useMemo(() => {
     return Array.from(campaignAthleteIds).map((athleteId) => {
       const campaignAthletePosts = campaignPosts.filter((post) => postHasAthlete(post, athleteId));
@@ -423,17 +369,6 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
   const commentLikeRatio = campaignSummary.totalLikes > 0
     ? (campaignSummary.totalComments / campaignSummary.totalLikes) * 100
     : 0;
-
-  const topPostsCarouselRef = useRef<HTMLDivElement>(null);
-  const scrollTopPostsCarousel = (direction: 'left' | 'right') => {
-    const container = topPostsCarouselRef.current;
-    if (!container) return;
-    const firstCard = container.querySelector<HTMLElement>('[data-carousel-card="true"]');
-    const cardWidth = firstCard?.offsetWidth ?? 320;
-    const gap = 24;
-    const delta = (cardWidth + gap) * (direction === 'left' ? -1 : 1);
-    container.scrollBy({ left: delta, behavior: 'smooth' });
-  };
 
   const perfData = useMemo(() => {
     const cLikes = campaignSummary.postCount ? campaignSummary.totalLikes / campaignSummary.postCount : 0;
@@ -551,56 +486,11 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
       .slice(0, 3);
   }, [athleteBenchmarks, campaignLiftMetric]);
 
-  const performanceDistribution = useMemo(() => {
-    const values = ohioSponsored.map((post) =>
-      getPostMetricValue(post, benchmarkMetric, engagementRateByAthlete)
-    );
-    if (values.length === 0) {
-      return {
-        worst: 0,
-        median: 0,
-        best: 0,
-        percentileTop: 0,
-        position: 0,
-        total: 0,
-      };
-    }
-    const sorted = [...values].sort((a, b) => a - b);
-    const worst = sorted[0];
-    const best = sorted[sorted.length - 1];
-    const median = sorted[Math.floor(sorted.length / 2)];
-    const percentileValue = (p: number) => {
-      const index = Math.max(0, Math.min(sorted.length - 1, Math.floor((p / 100) * (sorted.length - 1))));
-      return sorted[index];
-    };
-    const p5 = percentileValue(5);
-    const p95 = percentileValue(95);
-    const scaleMin = Math.min(p5, median);
-    const scaleMax = Math.max(p95, scaleMin + 1);
-    const campaignAvg = benchmarkCard.campaignValue;
-    const countBelow = sorted.filter((value) => value <= campaignAvg).length;
-    const percentile = (countBelow / sorted.length) * 100;
-    const percentileTop = Math.max(1, Math.round(100 - percentile));
-    const position = scaleMax > scaleMin
-      ? Math.min(100, Math.max(0, ((campaignAvg - scaleMin) / (scaleMax - scaleMin)) * 100))
-      : 0;
-
-    return {
-      worst,
-      median,
-      best,
-      percentileTop,
-      position,
-      total: sorted.length,
-    };
-  }, [ohioSponsored, benchmarkMetric, benchmarkCard.campaignValue, engagementRateByAthlete]);
 
   return (
-    <div className="min-h-screen bg-[#070708] text-white osu-report">
+    <div className="min-h-screen bg-[#f3f3f3] text-white osu-report">
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(187,0,0,0.25),_transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,_rgba(255,255,255,0.08),_transparent_45%)]" />
-        <div className="relative z-10 border-b border-white/10 backdrop-blur-xl bg-black/40">
+        <div className="relative z-10 border-b border-white/10 bg-white">
           <div className="max-w-[1600px] mx-auto px-6 py-6 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
               <button
