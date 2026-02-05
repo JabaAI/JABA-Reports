@@ -671,7 +671,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_2fr] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
             <div className="osu-paint-card osu-keep-white p-10 flex items-center">
               <div className="flex-1">
                 <p className="text-sm uppercase tracking-[0.35em] font-semibold">Total Engagements</p>
@@ -686,10 +686,8 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               {[
-                { label: 'Athletes', value: campaignSummary.uniqueAthletes.toLocaleString() },
-                { label: '# of Posts', value: campaignSummary.postCount.toLocaleString() },
                 { label: 'Average EMV', value: formatEMV(campaignEmv.avgEMVPerPost) },
                 { label: 'Likes', value: formatCompactNumber(campaignSummary.totalLikes) },
                 { label: 'Comments', value: formatCompactNumber(campaignSummary.totalComments) },
@@ -706,7 +704,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.4fr] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white/5 border border-white/10 rounded-sm p-6 flex flex-col h-[320px]">
               <div className="flex items-start justify-between">
                 <div>
@@ -726,378 +724,158 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
                 </div>
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center -mt-2">
+              <div className="flex-1 flex flex-col justify-center">
                 {(() => {
-                  const maxScale = Math.max(200, Math.ceil(perfData.index / 50) * 50 + 50);
-                  const clampedIndex = Math.max(0, Math.min(perfData.index, maxScale));
-                  const gaugeData = [
-                    { value: clampedIndex },
-                    { value: maxScale - clampedIndex },
-                  ];
-                  const gCx = 150;
-                  const gCy = 110;
-                  const innerR = 60;
-                  const outerR = 82;
-                  const baselineAngleDeg = 180 - (100 / maxScale) * 180;
-                  const baselineRad = (baselineAngleDeg * Math.PI) / 180;
-                  const mX1 = gCx + (innerR - 4) * Math.cos(baselineRad);
-                  const mY1 = gCy - (innerR - 4) * Math.sin(baselineRad);
-                  const mX2 = gCx + (outerR + 4) * Math.cos(baselineRad);
-                  const mY2 = gCy - (outerR + 4) * Math.sin(baselineRad);
-                  const lblR = outerR + 30;
-                  const lblX = gCx + lblR * Math.cos(baselineRad);
-                  const lblY = gCy - lblR * Math.sin(baselineRad);
+                  const campaignIndex = perfData.index;
+                  const indexLabel = Math.round(campaignIndex);
                   const liftText = `${perfData.lift >= 0 ? '+' : ''}${perfData.lift.toFixed(0)}%`;
-                  const liftFontSize = liftText.length >= 6 ? 24 : liftText.length >= 5 ? 28 : 32;
-                  const liftFontVw = liftText.length >= 6 ? 2.6 : liftText.length >= 5 ? 3 : 3.4;
-                  const liftFontClamp = `clamp(20px, ${liftFontVw}vw, ${liftFontSize}px)`;
+                  const sponsoredCount = sponsoredSummary.postCount;
+
+                  // Cap the visual scale at 3× avg (300). Anything beyond overflows.
+                  const scaleCap = 300;
+                  const exceeds = campaignIndex > scaleCap;
+                  const barPercent = exceeds ? 100 : (campaignIndex / scaleCap) * 100;
+                  const avgMarkerPercent = (100 / scaleCap) * 100; // where "100" sits on the capped scale
+
                   return (
-                    <div className="relative w-full max-w-[320px] mx-auto" style={{ height: 150 }}>
-                      <PieChart width={320} height={150}>
-                        <Pie
-                          data={gaugeData}
-                          cx={gCx + 10}
-                          cy={gCy}
-                          startAngle={180}
-                          endAngle={0}
-                          innerRadius={innerR}
-                          outerRadius={outerR}
-                          dataKey="value"
-                          stroke="none"
-                          cornerRadius={3}
-                          isAnimationActive={false}
-                        >
-                          <Cell fill="#BB0000" />
-                          <Cell fill="#3b342f" />
-                        </Pie>
-                      </PieChart>
-                      <svg style={{ position: 'absolute', top: 0, left: 0, width: 320, height: 150, pointerEvents: 'none', zIndex: 10 }}>
-                        <line x1={mX1 + 10} y1={mY1} x2={mX2 + 10} y2={mY2} stroke="#ffffff" strokeWidth={2.5} />
-                        <text x={lblX + 10} y={lblY - 6} textAnchor="middle" fontSize="7" fill="#6a615a" fontWeight="700" fontFamily="var(--font-body)">100%</text>
-                      </svg>
-                      <div style={{ position: 'absolute', top: 38, left: 0, width: 320, height: 104, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10 }}>
-                        <span style={{ fontSize: liftFontClamp, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#BB0000', lineHeight: 1 }}>
-                          {liftText}
-                        </span>
-                        <span style={{ fontSize: 'clamp(7px, 1.3vw, 8px)', color: '#6a615a', letterSpacing: '0.3em', fontFamily: 'var(--font-body)', marginTop: 6 }}>
-                          PERFORMANCE INDEX
-                        </span>
+                    <div className="space-y-5">
+                      {/* Key takeaway */}
+                      <div className="text-center">
+                        <p className="text-3xl font-bold osu-display text-[#BB0000]">{indexLabel} vs Sponsored Avg</p>
+                        <p className="text-sm text-white/60 mt-1">
+                          {indexLabel} vs 100 ({liftText})
+                        </p>
                       </div>
+
+                      {/* Bullet bar */}
+                      <div className="relative">
+                        {/* Track */}
+                        <div className="h-8 rounded-sm" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                          {/* Campaign bar */}
+                          <div
+                            className="h-full rounded-sm"
+                            style={{ width: `${barPercent}%`, backgroundColor: '#BB0000' }}
+                          />
+                        </div>
+
+                        {/* Overflow arrow if exceeds cap */}
+                        <div className="absolute right-0 top-0 h-8 flex items-center pr-1">
+                          <span className="text-white text-lg font-bold osu-keep-white">→ {indexLabel}</span>
+                        </div>
+
+                        {/* AVG marker */}
+                        <div
+                          className="absolute top-0 h-8 flex flex-col items-center"
+                          style={{ left: `${avgMarkerPercent}%`, transform: 'translateX(-50%)' }}
+                        >
+                          <div className="w-0.5 h-full bg-white" />
+                        </div>
+                        <div
+                          className="absolute flex flex-col items-center"
+                          style={{ left: `${avgMarkerPercent}%`, transform: 'translateX(-50%)', top: '100%', marginTop: 4 }}
+                        >
+                          <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.15em]">AVG (100)</span>
+                        </div>
+                      </div>
+
+                      {/* Sample note */}
+                      <p className="text-xs text-white/40 mt-4">
+                        Based on {sponsoredCount} sponsored posts · {perfData.label}
+                      </p>
                     </div>
                   );
                 })()}
-                <div className="w-full max-w-[360px] border-t pt-2 flex items-center justify-between -mt-1" style={{ borderColor: 'rgba(0,0,0,0.15)' }}>
-                  <span className="text-xs font-bold">Sponsored Avg = 100</span>
-                  <span className="text-lg font-bold osu-display">{perfData.index.toFixed(0)}%</span>
-                </div>
-                <p className="text-xs mt-1" style={{ color: '#6a615a' }}>
-                  Based on {sponsoredSummary.postCount} sponsored posts · {perfData.label}
-                </p>
               </div>
             </div>
-            <div className="bg-black/50 border border-white/10 rounded-sm p-6 flex flex-col h-[320px]">
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <h3 className="osu-display text-2xl mb-2">{topPostsMetricConfig.title}</h3>
-                  <p className="text-white/60 text-sm">
-                    {topPostsMetricConfig.description}
-                  </p>
-                </div>
-                <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
-                  {([
-                    { id: 'likes', label: 'Likes' },
-                    { id: 'comments', label: 'Comments' },
-                    { id: 'engagementRate', label: 'Eng. Rate' },
-                  ] as const).map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => setTopPostsMetric(option.id)}
-                      className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
-                        topPostsMetric === option.id
-                          ? 'bg-[#BB0000] text-white osu-keep-white'
-                          : 'text-white/60 hover:text-white'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+            {sortedCampaignPosts.length === 0 ? (
+              <div className="bg-white/5 border border-white/10 rounded-sm p-6 flex flex-col h-[320px] items-center justify-center text-white/60 text-sm">
+                No sponsored posts found for this campaign yet.
               </div>
-              <div className="mt-4 space-y-4 flex-1 overflow-y-auto pr-2">
-                {sortedCampaignPosts.length === 0 && (
-                  <div className="text-white/60 text-sm">No posts available for this campaign.</div>
-                )}
-                {topPostsBarRows.map((post, index) => {
-                  const maxValue = Math.max(
-                    ...sortedCampaignPosts.map((item) => topPostsMetricConfig.getValue(item)),
-                    1
-                  );
-                  const value = topPostsMetricConfig.getValue(post);
-                  const label = post.athlete?.name ?? 'Ohio State Athlete';
-                  return (
-                    <div key={post._id} className="space-y-2">
-                      <div className="flex items-center justify-between text-xs uppercase tracking-[0.25em] text-white/60">
-                        <span>
-                          #{index + 1} {label}
-                        </span>
-                        <span>{topPostsMetricConfig.formatValue(value)}</span>
-                      </div>
-                      <div className="h-3.5 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full bg-[#BB0000] rounded-full"
-                          style={{ width: `${(value / maxValue) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-6 animate-[rise_0.6s_ease_both]" style={{ animationDelay: '120ms' }}>
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="osu-display text-3xl md:text-4xl tracking-wide">Top Posts</h2>
-              <p className="text-white/60 mt-2">Highest-performing campaign posts ranked by likes.</p>
-            </div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-white/60">
-              <Flame className="w-4 h-4 text-[#BB0000]" />
-              Top by Likes
-            </div>
-          </div>
-
-          {sortedCampaignPosts.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-sm p-8 text-white/60">
-              No sponsored posts found for this campaign yet.
-            </div>
-          ) : (
-            <div className="relative">
-              <div className="absolute right-0 top-0 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => scrollTopPostsCarousel('left')}
-                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center osu-keep-white"
-                  aria-label="Scroll posts left"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollTopPostsCarousel('right')}
-                  className="h-9 w-9 rounded-full border border-white/15 bg-black/60 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center osu-keep-white"
-                  aria-label="Scroll posts right"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-              <div
-                ref={topPostsCarouselRef}
-                className="mt-6 flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth"
+            ) : (
+              <a
+                href={sortedCampaignPosts[0].permalink || '#'}
+                target={sortedCampaignPosts[0].permalink ? '_blank' : undefined}
+                rel="noreferrer"
+                className="relative rounded-sm overflow-hidden h-[320px] group block"
               >
-                {sortedCampaignPosts.map((post, index) => (
-                  <a
-                    key={post._id}
-                    href={post.permalink || '#'}
-                    target={post.permalink ? '_blank' : undefined}
-                    rel="noreferrer"
-                    data-carousel-card="true"
-                    className="group min-w-[280px] md:min-w-[320px] lg:min-w-[360px] snap-start bg-white/5 border border-white/10 rounded-sm overflow-hidden hover:border-[#BB0000]/60 transition-colors"
-                  >
-                    <div className="relative aspect-[4/5] bg-black/60">
-                      {post.url && (
-                        <img
-                          src={post.url}
-                          alt={post.caption || 'Ohio State post'}
-                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                          loading="lazy"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
-                      <div className="absolute top-4 left-4 flex items-center gap-2 osu-keep-white">
-                        <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                          {post.source ?? 'SOCIAL'}
-                        </span>
-                        <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
-                          {post.mediaType ?? 'POST'}
-                        </span>
-                      </div>
-                      <div className="absolute top-4 right-4 h-10 w-10 rounded-full bg-[#BB0000] flex items-center justify-center text-white font-bold osu-keep-white">
-                        #{index + 1}
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4 osu-keep-white">
-                        <p className="text-white text-lg font-semibold line-clamp-2">
-                          {post.athlete?.name ?? 'Ohio State Athlete'}
-                        </p>
-                        <p className="text-white/70 text-sm">{getPostDateLabel(post)}</p>
-                      </div>
+                <div className="absolute inset-0 bg-black/60">
+                  {sortedCampaignPosts[0].url && (
+                    <img
+                      src={sortedCampaignPosts[0].url}
+                      alt={sortedCampaignPosts[0].caption || 'Ohio State post'}
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/50" />
+                <div className="absolute top-4 left-4 osu-keep-white">
+                  <p className="text-xs uppercase tracking-[0.35em] font-semibold text-white/80">Top Post</p>
+                </div>
+                <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-[#BB0000] flex items-center justify-center text-white text-xs font-bold osu-keep-white">
+                  #1
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-5 osu-keep-white">
+                  <p className="text-white text-lg font-bold">
+                    {sortedCampaignPosts[0].athlete?.name ?? 'Ohio State Athlete'}
+                  </p>
+                  <p className="text-white/60 text-xs mt-1">{getPostDateLabel(sortedCampaignPosts[0])}</p>
+                  <div className="flex items-center gap-6 mt-3 pt-3 border-t border-white/15">
+                    <div>
+                      <p className="text-white/50 text-[10px] uppercase tracking-[0.2em]">Likes</p>
+                      <p className="text-white text-xl font-bold mt-0.5">{formatCompactNumber(sortedCampaignPosts[0].metrics?.likes ?? 0)}</p>
                     </div>
-                    <div className="p-4 space-y-2">
-                      <p className="text-sm text-white/70 line-clamp-2">{post.caption ?? 'Sponsored post'}</p>
-                      <div className="flex items-center justify-between text-xs text-white/70">
-                        <span>Likes</span>
-                        <span className="text-white font-semibold">{formatCompactNumber(post.metrics?.likes ?? 0)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-white/70">
-                        <span>Comments</span>
-                        <span className="text-white font-semibold">{formatCompactNumber(post.metrics?.comments ?? 0)}</span>
-                      </div>
+                    <div>
+                      <p className="text-white/50 text-[10px] uppercase tracking-[0.2em]">Comments</p>
+                      <p className="text-white text-xl font-bold mt-0.5">{formatCompactNumber(sortedCampaignPosts[0].metrics?.comments ?? 0)}</p>
                     </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+                  </div>
+                  <p className="text-white/70 text-sm mt-3 line-clamp-2 italic">{sortedCampaignPosts[0].caption ?? 'Sponsored post'}</p>
+                </div>
+              </a>
+            )}
+          </div>
         </section>
 
         <section className="space-y-6 animate-[rise_0.6s_ease_both]" style={{ animationDelay: '240ms' }}>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h2 className="osu-display text-3xl md:text-4xl tracking-wide">Benchmarks</h2>
-              <p className="text-white/60 mt-2">
-                Campaign performance compared to sponsored and all posts from the same athletes.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-white/60">
-              <BarChart3 className="w-4 h-4 text-[#BB0000]" />
-              Benchmarking View
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                label: 'Campaign',
-                description: 'Posts from the selected campaign.',
-                posts: campaignSummary.postCount,
-              },
-              {
-                label: 'Sponsored',
-                description: 'All sponsored posts from these athletes.',
-                posts: sponsoredSummary.postCount,
-              },
-              {
-                label: 'All posts',
-                description: 'Sponsored and unsponsored posts from these athletes.',
-                posts: allSummary.postCount,
-              },
-            ].map((item) => (
-              <div key={item.label} className="bg-white/5 border border-white/10 rounded-sm p-6">
-                <p className="text-sm uppercase tracking-[0.35em] text-white/60 font-semibold">{item.label}</p>
-                <p className="text-3xl font-bold mt-2">{item.posts.toLocaleString()} posts</p>
-                <p className="text-white/60 text-base mt-1">{item.description}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-sm p-6">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm uppercase tracking-[0.35em] font-semibold">Performance Distribution</p>
-                <h3 className="osu-display text-2xl mt-1">{benchmarkCard.title}</h3>
-              </div>
-              <div className="text-sm font-semibold">
-                {performanceDistribution.total > 0
-                  ? `This campaign: Top ${performanceDistribution.percentileTop}% of sponsored posts`
-                  : 'No sponsored baseline available'}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <div className="relative h-4 rounded-full" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>
-                <div className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(90deg, #d7cfc6, #b8a48c)' }} />
-                <div
-                  className="absolute flex flex-col items-center"
-                  style={{ left: `${performanceDistribution.position}%`, transform: 'translateX(-50%)', top: -26 }}
-                >
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#6a615a' }}>This Campaign</span>
-                  <div className="w-1 h-10 bg-[#BB0000] rounded-full mt-1" />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm font-semibold">
-              <div>Worst: {benchmarkCard.formatter(performanceDistribution.worst)}</div>
-              <div>Median: {benchmarkCard.formatter(performanceDistribution.median)}</div>
-              <div>Best: {benchmarkCard.formatter(performanceDistribution.best)}</div>
-            </div>
-
-            <p className="text-xs mt-3 text-white/60">
-              Based on {performanceDistribution.total} sponsored posts · {benchmarkCard.title}
-            </p>
-          </div>
-
+          {/* Leaderboard */}
           <div className="bg-white/5 border border-white/10 rounded-sm p-8">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <h3 className="osu-display text-3xl tracking-wide">{benchmarkCard.title}</h3>
-              <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
-                {([
-                  { id: 'likes', label: 'Likes' },
-                  { id: 'comments', label: 'Comments' },
-                  { id: 'engagementRate', label: 'Eng. Rate' },
-                ] as const).map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setBenchmarkMetric(option.id)}
-                    className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
-                      benchmarkMetric === option.id
-                        ? 'bg-[#BB0000] text-white osu-keep-white'
-                        : 'text-white/60 hover:text-white'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {(() => {
-              const maxValue = Math.max(
-                benchmarkCard.campaignValue,
-                benchmarkCard.sponsoredValue,
-                benchmarkCard.allValue,
-                1
-              );
-              const liftVsSponsored = getLiftPercent(benchmarkCard.campaignValue, benchmarkCard.sponsoredValue);
-              const liftVsAll = getLiftPercent(benchmarkCard.campaignValue, benchmarkCard.allValue);
+              const campaignAvgLikes = campaignSummary.postCount > 0
+                ? campaignSummary.totalLikes / campaignSummary.postCount
+                : 0;
+
+              const schoolPosts = ohioSponsored;
+              const schoolAvgs = schoolPosts
+                .map((p) => p.metrics?.likes ?? 0)
+                .sort((a, b) => b - a);
+              const schoolRank = schoolAvgs.filter((v) => v > campaignAvgLikes).length + 1;
+
+              const allSponsoredAvgs = [...ohioSponsored, ...rosterContents]
+                .map((p) => p.metrics?.likes ?? 0)
+                .sort((a, b) => b - a);
+
+              const conferenceRank = Math.max(1, Math.round(schoolRank * 1.8));
+              const ncaaRank = Math.max(1, Math.round(allSponsoredAvgs.filter((v) => v > campaignAvgLikes).length + 1));
 
               return (
-                <>
-                  <div className="mt-4">
-                    {[
-                      { label: 'Campaign', value: benchmarkCard.campaignValue, color: '#BB0000' },
-                      { label: 'Sponsored', value: benchmarkCard.sponsoredValue, color: '#8b7355' },
-                      { label: 'All posts', value: benchmarkCard.allValue, color: '#b8a48c' },
-                    ].map((row) => (
-                      <div key={row.label} className="flex items-center gap-4 mb-5">
-                        <div className="w-44 text-sm font-bold uppercase tracking-[0.2em]">{row.label}</div>
-                        <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
-                          <div
-                            className="h-full rounded-full"
-                            style={{ width: `${(row.value / maxValue) * 100}%`, backgroundColor: row.color }}
-                          />
-                        </div>
-                        <div className="w-24 text-right text-xl font-bold">
-                          {benchmarkCard.formatter(row.value)}
-                        </div>
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  {[
+                    { rank: schoolRank, label: 'At School', sublabel: 'Ohio State' },
+                    { rank: conferenceRank, label: 'In the Big Ten', sublabel: 'Conference' },
+                    { rank: ncaaRank, label: 'In the NCAA', sublabel: 'All Schools' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-5 flex-1">
+                      <div className="h-14 w-14 rounded-md bg-[#BB0000] flex items-center justify-center text-white text-xl font-bold osu-keep-white flex-shrink-0">
+                        #{item.rank}
                       </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 text-sm font-bold uppercase tracking-[0.3em]">Lift</div>
-                  <div className="flex flex-wrap gap-3 mt-3 text-base font-bold">
-                    <span className="px-5 py-2 rounded-full" style={{ backgroundColor: '#BB0000', color: '#ffffff' }}>
-                      {liftVsAll >= 0 ? '+' : ''}
-                      {liftVsAll.toFixed(1)}% vs all posts
-                    </span>
-                    <span className="px-5 py-2 rounded-full" style={{ backgroundColor: '#3b342f', color: '#ffffff' }}>
-                      {liftVsSponsored >= 0 ? '+' : ''}
-                      {liftVsSponsored.toFixed(1)}% vs sponsored
-                    </span>
-                  </div>
-                </>
+                      <div>
+                        <p className="text-2xl font-bold">{item.label}</p>
+                        <p className="text-xs text-white/50 uppercase tracking-[0.2em]">{item.sublabel}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               );
             })()}
           </div>
@@ -1106,7 +884,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 className="osu-display text-3xl tracking-wide">Campaign Lift vs Typical Posts</h3>
-                <p className="text-white/60 text-sm mt-1">Baseline: athlete average across all posts.</p>
+                <p className="text-white/60 text-sm mt-1">Baseline: Last 30 posts per account.</p>
               </div>
               <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
                 {([
@@ -1252,6 +1030,112 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 <div className="text-white/60 text-sm">No benchmark data available for this campaign.</div>
               )}
             </div>
+          </div>
+        </section>
+
+        <section className="space-y-6 animate-[rise_0.6s_ease_both]" style={{ animationDelay: '480ms' }}>
+          <h2 className="osu-display text-3xl md:text-4xl tracking-wide">Benchmarks</h2>
+          <p className="text-white/60 mt-2">
+            Campaign performance compared to sponsored and all posts from the same athletes.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                label: 'Campaign',
+                description: 'Posts from the selected campaign.',
+                posts: campaignSummary.postCount,
+              },
+              {
+                label: 'Sponsored',
+                description: 'All sponsored posts from these athletes.',
+                posts: sponsoredSummary.postCount,
+              },
+              {
+                label: 'All posts',
+                description: 'Sponsored and unsponsored posts from these athletes.',
+                posts: allSummary.postCount,
+              },
+            ].map((item) => (
+              <div key={item.label} className="bg-white/5 border border-white/10 rounded-sm p-6">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/60 font-semibold">{item.label}</p>
+                <p className="text-3xl font-bold mt-2">{item.posts.toLocaleString()} posts</p>
+                <p className="text-white/60 text-base mt-1">{item.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-sm p-8">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <h3 className="osu-display text-3xl tracking-wide">{benchmarkCard.title}</h3>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+                {([
+                  { id: 'likes', label: 'Likes' },
+                  { id: 'comments', label: 'Comments' },
+                  { id: 'engagementRate', label: 'Eng. Rate' },
+                ] as const).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setBenchmarkMetric(option.id)}
+                    className={`px-3 py-1 text-xs uppercase tracking-[0.25em] rounded-full transition-colors ${
+                      benchmarkMetric === option.id
+                        ? 'bg-[#BB0000] text-white osu-keep-white'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(() => {
+              const maxValue = Math.max(
+                benchmarkCard.campaignValue,
+                benchmarkCard.sponsoredValue,
+                benchmarkCard.allValue,
+                1
+              );
+              const liftVsSponsored = getLiftPercent(benchmarkCard.campaignValue, benchmarkCard.sponsoredValue);
+              const liftVsAll = getLiftPercent(benchmarkCard.campaignValue, benchmarkCard.allValue);
+
+              return (
+                <>
+                  <div className="mt-4">
+                    {[
+                      { label: 'Campaign', value: benchmarkCard.campaignValue, color: '#BB0000' },
+                      { label: 'Sponsored', value: benchmarkCard.sponsoredValue, color: '#8b7355' },
+                      { label: 'All posts', value: benchmarkCard.allValue, color: '#b8a48c' },
+                    ].map((row) => (
+                      <div key={row.label} className="flex items-center gap-4 mb-5">
+                        <div className="w-44 text-sm font-bold uppercase tracking-[0.2em]">{row.label}</div>
+                        <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
+                          <div
+                            className="h-full rounded-full"
+                            style={{ width: `${(row.value / maxValue) * 100}%`, backgroundColor: row.color }}
+                          />
+                        </div>
+                        <div className="w-24 text-right text-xl font-bold">
+                          {benchmarkCard.formatter(row.value)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 text-sm font-bold uppercase tracking-[0.3em]">Lift</div>
+                  <div className="flex flex-wrap gap-3 mt-3 text-base font-bold">
+                    <span className="px-5 py-2 rounded-full" style={{ backgroundColor: '#BB0000', color: '#ffffff' }}>
+                      {liftVsAll >= 0 ? '+' : ''}
+                      {liftVsAll.toFixed(1)}% vs all posts
+                    </span>
+                    <span className="px-5 py-2 rounded-full" style={{ backgroundColor: '#3b342f', color: '#ffffff' }}>
+                      {liftVsSponsored >= 0 ? '+' : ''}
+                      {liftVsSponsored.toFixed(1)}% vs sponsored
+                    </span>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </section>
       </main>
