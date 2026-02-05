@@ -176,6 +176,15 @@ const formatCampaignName = (campaignName: string) => {
   return titleCase(normalized);
 };
 
+const formatSportLabel = (sport?: string) => {
+  if (!sport) return 'N/A';
+  return sport
+    .toLowerCase()
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 const getLiftPercent = (value: number, baseline: number) =>
   baseline > 0 ? ((value - baseline) / baseline) * 100 : 0;
 
@@ -935,7 +944,7 @@ export function OhioStateCampaignReport({ onBack }: OhioStateCampaignReportProps
                 >
                   <div>
                     <div className="text-sm font-semibold text-white">{athlete.name}</div>
-                    <div className="text-xs text-white/60">{athlete.sport}</div>
+                    <div className="text-xs text-white/60">{formatSportLabel(athlete.sport)}</div>
                   </div>
                   <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-white/70">
                     <span className="px-3 py-1 rounded-full bg-white/10">
